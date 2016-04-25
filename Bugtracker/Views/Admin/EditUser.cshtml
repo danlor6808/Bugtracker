@@ -1,0 +1,16 @@
+﻿@model Bugtracker.Models.AdminViewModel
+@{
+    ViewBag.Title = "EditUsers";
+}
+
+<h2>Manage User Roles</h2>
+
+@using (Html.BeginForm("EditUser", "Admin", FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+@Html.ListBox("SelectedRoles", Model.Roles, new { @class = "selectpicker", Title="Choose between Roles"})
+    <input type="submit" value="submit" />
+    <hr />
+
+    @Html.DisplayFor(model => model.Name)
+}

@@ -1,0 +1,73 @@
+﻿@model IEnumerable<Bugtracker.Models.Project>
+
+@{
+    ViewBag.Title = "Project List";
+}
+
+<h2>Project List</h2>
+
+@if (User.Identity.IsAuthenticated && User.IsInRole("Administrator"))
+{
+<p>
+    @Html.ActionLink("Create New", "Create")
+</p>
+}
+<table class="table">
+    <tr>
+        <th>
+            Project
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Created)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Updated)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Status)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Deadline)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Tickets)
+        </th>
+        <th></th>
+    </tr>
+
+@foreach (var item in Model) {
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.Name)
+        </td>
+        <td>
+            @item.Created.ToString("d")
+        </td>
+        <td>
+            @{
+                if (item.Updated.HasValue)
+                {
+                    @item.Updated.Value.ToString("d")
+                }
+            }
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Status)
+        </td>
+        <td>
+            @item.Deadline.Value.ToString("d")
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Tickets)
+        </td>
+        <td>
+            @if (User.Identity.IsAuthenticated && User.IsInRole("Administrator"))
+            { 
+            @Html.ActionLink("Edit", "Edit", new { id = item.Id }) @:|
+            @Html.ActionLink("Delete", "Delete", new { id = item.Id })
+            }
+        </td>
+    </tr>
+}
+
+</table>

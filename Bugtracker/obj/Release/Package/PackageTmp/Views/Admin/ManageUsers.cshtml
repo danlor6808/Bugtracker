@@ -1,0 +1,59 @@
+﻿@model IEnumerable<Bugtracker.Models.UserViewModel>
+
+@{
+    ViewBag.Title = "Manage Users";
+}
+
+<h2>Manage Users</h2>
+@Html.AntiForgeryToken()
+<div>
+        <table class="table">
+            <tr>
+                <th>
+                    First Name
+                </th>
+                <th>
+                    Last Name
+                </th>
+                <th>
+                    E-mail
+                </th>
+                <th>
+                    User Roles
+                </th>
+                <th>
+                    Projects Assigned
+                </th>
+                <th></th>
+            </tr>
+
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.user.FirstName)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.user.LastName)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.user.Email)
+                    </td>
+                    <td>
+                        @foreach (var role in item.roles)
+                        {
+                            @role<br />
+                        }
+                    </td>
+                    <td>
+                        Work in Progress
+                    </td>
+                    <td>
+                        <ul class="list-unstyled">
+                            <li>@Html.ActionLink("Edit", "EditUser", new { id = item.user.Id })</li>
+                        </ul>
+                    </td>
+                </tr>
+            }
+            </table>
+</div>
