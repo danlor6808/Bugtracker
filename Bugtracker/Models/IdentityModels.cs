@@ -24,14 +24,14 @@ namespace Bugtracker.Models
         public ApplicationUser()
         {
             this.Projects = new HashSet<Project>();
-            this.Tickets = new HashSet<Ticket>();
+            //this.Tickets = new HashSet<Ticket>();
             this.Comments = new HashSet<TicketComments>();
             this.Attachments = new HashSet<Attachments>();
             this.TicketHistory = new HashSet<TicketHistory>();
         }
 
         public virtual ICollection<Project> Projects { get; set; }
-        public virtual ICollection<Ticket> Tickets { get; set; }
+        //public virtual ICollection<Ticket> Tickets { get; set; }
         public virtual ICollection<TicketComments> Comments { get; set; }
         public virtual ICollection<Attachments> Attachments { get; set; }
         public virtual ICollection<TicketHistory> TicketHistory { get; set; }
@@ -54,5 +54,8 @@ namespace Bugtracker.Models
         public DbSet<TicketComments> TicketComment { get; set; }
         public DbSet<Attachments> Attachment { get; set; }
         public DbSet<TicketHistory> TicketHistory { get; set; }
+        public DbSet<TicketPriority> TicketPriority { get; set; }
+        public DbSet<TicketStatus> TicketStatus { get; set; }
+        public DbSet<TicketType> TicketType { get; set; }
     }
 }

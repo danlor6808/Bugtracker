@@ -8,6 +8,7 @@ using Microsoft.AspNet.Identity;
 
 namespace Bugtracker.Controllers
 {
+    [Authorize]
     [RequireHttps]
     public class AdminController : Controller
     {

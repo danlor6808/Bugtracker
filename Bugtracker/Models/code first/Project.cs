@@ -11,6 +11,7 @@ namespace Bugtracker.Models
         public Project()
         {
             this.Tickets = new HashSet<Ticket>();
+            this.User = new HashSet<ApplicationUser>();
         }
         public int Id { get; set; }
         public string Name { get; set; }

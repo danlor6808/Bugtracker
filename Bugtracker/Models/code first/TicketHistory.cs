@@ -13,6 +13,5 @@ namespace Bugtracker.Models
         public string PropertyChanged { get; set; }
 
         public ApplicationUser userId { get; set; }
-
     }
 }

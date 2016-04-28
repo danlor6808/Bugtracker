@@ -18,4 +18,17 @@ namespace Bugtracker.Models
         public ApplicationUser user { get; set; }
         public List<string> roles { get; set; }
     }
+
+    public class ProjUserViewModel
+    {
+        public Project project { get; set; }
+        public MultiSelectList Users { get; set; }
+        public string[] SelectedUsers { get; set; }
+    }
+
+    public class ListViewModel
+    {
+
+    }
+
 }

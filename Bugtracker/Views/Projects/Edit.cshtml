@@ -27,7 +27,8 @@
         <div class="form-group">
             @Html.LabelFor(model => model.Status, htmlAttributes: new { @class = "control-label col-md-2" })
             <div class="col-md-10">
-                @Html.DropDownList("Status", new SelectList(ViewBag.Status, "value", "text"), new { @class="selectpicker"})
+                @*@Html.DropDownList("Status", new SelectList(ViewBag.Status, "value", "text"), new { @class="selectpicker"})*@
+                @Html.DropDownList("Status", ViewBag.Status as SelectList, new { @class = "selectpicker" })
                 @Html.ValidationMessageFor(model => model.Status, "", new { @class = "text-danger" })
             </div>
         </div>
@@ -37,6 +38,14 @@
             <div class="col-md-10">
                 @Html.EditorFor(model => model.Deadline, new { htmlAttributes = new { @class = "form-control", id = "datetimepicker" } })
                 @Html.ValidationMessageFor(model => model.Deadline, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="control-label col-md-2" for="users">Assigned Users</label>
+            <div class="col-md-10">
+                @Html.ListBox("UserSelected", new MultiSelectList(ViewBag.userList, "Id", "UserName", ViewBag.selectList), new { @class = "selectpicker", Title = "Choose users to assign" })
+                @Html.ValidationMessageFor(model => model.User, "", new { @class = "text-danger" })
             </div>
         </div>
 

@@ -3,9 +3,14 @@
 @{
     ViewBag.Title = "Project List";
 }
-
+<div class="row">
+    <ol class="breadcrumb">
+        <li><a href="#"><svg class="glyph stroked home"><use xlink:href="#stroked-home"></use></svg></a></li>
+        <li class="active">Icons</li>
+    </ol>
+</div><!--/.row-->
 <h2>Project List</h2>
-
+@Html.AntiForgeryToken()
 @if (User.Identity.IsAuthenticated && User.IsInRole("Administrator"))
 {
 <p>
@@ -32,7 +37,13 @@
         <th>
             @Html.DisplayNameFor(model => model.Tickets)
         </th>
+        <th>
+            Users Assigned
+        </th>
+        @if (User.Identity.IsAuthenticated && User.IsInRole("Administrator"))
+        {
         <th></th>
+        }
     </tr>
 
 @foreach (var item in Model) {
@@ -58,15 +69,21 @@
             @item.Deadline.Value.ToString("d")
         </td>
         <td>
-            @Html.DisplayFor(modelItem => item.Tickets)
+            <a href="@Url.Action("Index","Tickets", new { id = @item.Id})">@item.Tickets.Count</a>
         </td>
         <td>
-            @if (User.Identity.IsAuthenticated && User.IsInRole("Administrator"))
-            { 
-            @Html.ActionLink("Edit", "Edit", new { id = item.Id }) @:|
-            @Html.ActionLink("Delete", "Delete", new { id = item.Id })
-            }
+           @foreach (var user in item.User)
+           {
+               @user.UserName<br />
+           }
         </td>
+        @if (User.Identity.IsAuthenticated && User.IsInRole("Administrator"))
+        {
+        <td>
+            @Html.ActionLink("Edit", "Edit", new { id = item.Id }) |
+            @Html.ActionLink("Delete", "Delete", new { id = item.Id })
+        </td>
+        }
     </tr>
 }
 

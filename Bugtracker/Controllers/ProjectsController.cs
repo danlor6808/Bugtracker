@@ -7,6 +7,8 @@ using System.Net;
 using System.Web;
 using System.Web.Mvc;
 using Bugtracker.Models;
+using Microsoft.AspNet.Identity;
+using Microsoft.AspNet.Identity.EntityFramework;
 
 namespace Bugtracker.Controllers
 {
@@ -15,6 +17,7 @@ namespace Bugtracker.Controllers
     public class ProjectsController : Controller
     {
         private ApplicationDbContext db = new ApplicationDbContext();
+        
 
         // GET: Projects
         public ActionResult Index()
@@ -82,24 +85,14 @@ namespace Bugtracker.Controllers
             {
                 return HttpNotFound();
             }
-            //var Status = new List<SelectListItem>();
-            //Status.Add(new SelectListItem { Text = "Open", Value = "Open" });
-            //Status.Add(new SelectListItem { Text = "Closed", Value = "Closed" });
-            //Status.Add(new SelectListItem { Text = "Work in Progress", Value = "Work in Progress" });
 
-            var Status = new[]
-            {
-            new SelectListItem() { Text = "Open", Value = "Open" },
-            new SelectListItem() { Text = "Closed", Value = "Closed" },
-            new SelectListItem() { Text = "Work in Progress", Value = "Work in Progress" }
-            };
-
-            var SelectedStatus = Status.First(d => d.Value == project.Status);
-            if (SelectedStatus != null)
-            {
-                SelectedStatus.Selected = true;
-            }
-            ViewBag.Status = Status;
+            ProjectUserHelper helper = new ProjectUserHelper(db);
+            //Status list
+            ViewBag.Status = helper.statuslist(project.Id);
+            //List of all users
+            ViewBag.userList = db.Users.ToList();
+            //List of all projects that user current has
+            ViewBag.selectList = project.User.Select(n => n.Id).ToList();
 
             return View(project);
         }
@@ -110,23 +103,73 @@ namespace Bugtracker.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Administrator")]
-        public ActionResult Edit([Bind(Include = "Id,Name,Updated,Status,Deadline")] Project project)
+        public ActionResult Edit([Bind(Include = "Id,Name,Updated,Status,Deadline")] Project project, List<string> UserSelected)
         {
             if (ModelState.IsValid)
             {
-                //db.Entry(project).State = EntityState.Modified;
-                project.Updated = System.DateTimeOffset.Now;
-                db.Project.Attach(project);
-                db.Entry(project).Property("Name").IsModified = true;
-                db.Entry(project).Property("Updated").IsModified = true;
-                db.Entry(project).Property("Status").IsModified = true;
-                db.Entry(project).Property("Deadline").IsModified = true;
+                var currentProject = db.Project.Find(project.Id);
+                var allUsers = db.Users.ToList();
+                var helper = new ProjectUserHelper(db);
+                project.Updated = DateTimeOffset.Now;
+                currentProject.User = project.User;
+                currentProject.Name = project.Name;
+                currentProject.Status = project.Status;
+                currentProject.Deadline = project.Deadline;
 
+                //Removes all users if there are any
+                if (project.User != null)
+                {
+                    foreach (var user in allUsers)
+                    {
+                        if (db.Project.Find(project.Id).User.Any(u => u.Id == user.Id))
+                        {
+                            helper.removeProjectUser(project.Id, user.Id);
+                        }
+                    }
+                }
+
+                //Adds users if any are selected from the multiselect box
+                if (UserSelected != null)
+                {
+                    foreach (var id in UserSelected)
+                    {
+                        helper.addProjectUser(project.Id, id);
+                    }
+                }
+
+                //Checks if Project name is empty and throws an error if true
                 if (String.IsNullOrWhiteSpace(project.Name))
                 {
-                    ModelState.AddModelError("Name", "Invalid Title.");
+                    ModelState.AddModelError("Name", "The title must be unique.");
+
+                    //Status list
+                    ViewBag.Status = helper.statuslist(project.Id);
+                    //List of all users
+                    ViewBag.userList = db.Users.ToList();
+                    //List of all projects that user current has
+                    ViewBag.selectList = project.User.Select(n => n.Id).ToList();
                     return View(project);
                 }
+
+                //
+                var ProjectAlreadyExists = db.Project.Where(p => p.Id == project.Id && p.Name == project.Name).Select(p => p.Name);
+                if (!ProjectAlreadyExists.Any())
+                {
+                    if (db.Project.Any(p => p.Name == project.Name))
+                    {
+                        ModelState.AddModelError("Name", "The title must be unique.");
+
+                        //Status list
+                        ViewBag.Status = helper.statuslist(project.Id);
+                        //List of all users
+                        ViewBag.userList = db.Users.ToList();
+                        //List of all projects that user current has
+                        ViewBag.selectList = project.User.Select(n => n.Id).ToList();
+                        return View(project);
+                    }
+                }
+
+                //save changes
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
@@ -134,7 +177,6 @@ namespace Bugtracker.Controllers
         }
 
         // GET: Projects/Delete/5
-        [ValidateAntiForgeryToken]
         [Authorize(Roles = "Administrator")]
         public ActionResult Delete(int? id)
         {
