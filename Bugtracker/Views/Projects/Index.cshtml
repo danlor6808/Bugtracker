@@ -3,12 +3,6 @@
 @{
     ViewBag.Title = "Project List";
 }
-<div class="row">
-    <ol class="breadcrumb">
-        <li><a href="#"><svg class="glyph stroked home"><use xlink:href="#stroked-home"></use></svg></a></li>
-        <li class="active">Icons</li>
-    </ol>
-</div><!--/.row-->
 <h2>Project List</h2>
 @Html.AntiForgeryToken()
 @if (User.Identity.IsAuthenticated && User.IsInRole("Administrator"))

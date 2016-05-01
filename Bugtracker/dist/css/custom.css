@@ -1,0 +1,17 @@
+/*.Low, .Moderate, .High {
+    padding:3px;
+    color: #fff;
+    border-radius: 5px;
+}*/
+
+.Low {
+    color: yellow;
+}
+
+.Moderate {
+    color: orange;
+}
+
+.High {
+   color: red;
+}

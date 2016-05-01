@@ -1,4 +1,5 @@
 ﻿using Bugtracker.Models;
+using Microsoft.AspNet.Identity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,24 +11,42 @@ namespace Bugtracker.Controllers
     [RequireHttps]
     public class HomeController : Controller
     {
+        private ApplicationDbContext db = new ApplicationDbContext();
 
         public ActionResult Index()
         {
+            ViewBag.layout = "sidebar-collapse";
             return View();
         }
 
         public ActionResult About()
         {
-            ViewBag.Message = "Your application description page.";
 
             return View();
         }
 
         public ActionResult Contact()
         {
-            ViewBag.Message = "Your contact page.";
+
 
             return View();
+        }
+
+        [Authorize]
+        public ActionResult UserPanel()
+        {
+            ViewBag.layout = "sidebar-mini";
+            var user = db.Users.Find(User.Identity.GetUserId());
+            var list = new List<Project>();
+            if (User.IsInRole("Administrator")) 
+            {
+                list = db.Project.ToList();
+            }
+            else
+            {
+                list = user.Projects.ToList();
+            }
+            return View(list);
         }
     }
 }
