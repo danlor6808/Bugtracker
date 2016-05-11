@@ -1,0 +1,235 @@
+@model IEnumerable<Bugtracker.Models.Project>
+@using Microsoft.AspNet.Identity;
+
+@section CustomCSS{
+    <link rel="stylesheet" href="../../plugins/datatables/dataTables.bootstrap.css">
+}
+
+<div class="row">
+    <div class="col-xs-12">
+        <div class="box">
+            <div class="box-header">
+                <h3 class="box-title">Recent Projects</h3>
+            </div><!-- /.box-header -->
+            <div class="box-body">
+                <table id="pTable" class="display table table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th>
+                                Project
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Created)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Updated)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Status)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Deadline)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Tickets)
+                            </th>
+                            <th>
+                                Users Assigned
+                            </th>
+                                <th></th>
+                        </tr>
+                    </thead>
+                    @foreach (var item in Model)
+                    {
+                        <tbody>
+                            <tr>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Name)
+                                </td>
+                                <td>
+                                    @item.Created.ToString("d")
+                                </td>
+                                <td>
+                                    @{
+                                        if (item.Updated.HasValue)
+                                        {
+                                            @item.Updated.Value.ToString("d")
+                                        }
+                                    }
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Status)
+                                </td>
+                                <td>
+                                    @item.Deadline.Value.ToString("d")
+                                </td>
+                                <td>
+                                    @*<a href="@Url.Action("Index","Tickets", new { id = @item.Id})">@item.Tickets.Count</a>*@
+                                    @item.Tickets.Count
+                                </td>
+                                <td>
+                                    @foreach (var user in item.User)
+                                    {
+                                        @user.UserName<br />
+                                    }
+                                </td>
+                                <td>
+                                    <ul class="list-unstyled">
+                                        @if (User.Identity.IsAuthenticated && User.IsInRole("Administrator"))
+                                        {
+                                            <li><a class="" href="@Url.Action("Edit", "Projects", new { id = item.Id })">Edit</a></li>
+                                            <li><a class="" href="@Url.Action("Delete", "Projects", new { id = item.Id })">Delete</a></li>
+                                        }
+                                        <li><a class="" href="@Url.Action("Create", "Tickets", new { id = item.Id })">Create Ticket</a></li>
+                                    </ul>
+                                </td>
+                            </tr>
+                        </tbody>
+                      }
+                </table>
+                @if (User.Identity.IsAuthenticated && User.IsInRole("Administrator"))
+                {
+                    <a class="btn btn-default" href="@Url.Action("Create", "Projects")">New Project</a>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-xs-12">
+        <div class="box">
+            <div class="box-header">
+                <h3 class="box-title">Recent Tickets</h3>
+            </div><!-- /.box-header -->
+            <div class="box-body">
+                <table id="tTable" class="display table table-bordered table-condensed table-striped">
+                    <thead>
+                        <tr>
+                            <th>
+                                Name
+                            </th>
+                            <th>
+                                Author
+                            </th>
+                            <th>
+                                Title
+                            </th>
+                            <th>
+                                Status
+                            </th>
+                            <th>
+                                Type
+                            </th>
+                            <th>
+                                Priority
+                            </th>
+                            <th>
+                                Created
+                            </th>
+                            <th>
+                                Updated
+                            </th>
+                            <th>
+                                Developer Assigned
+                            </th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            foreach (var ticket in item.Tickets)
+                            {
+                                if (User.Identity.IsAuthenticated && User.IsInRole("Administrator") || User.IsInRole("Project Manager") || User.IsInRole("Developer") || ticket.AuthorId == User.Identity.GetUserId())
+                                {
+                            <tr>
+                                <td>
+                                    @Html.DisplayFor(modelItem => ticket.Project.Name)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => ticket.Author.UserName)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => ticket.Title)
+                                </td>
+                                <td>
+                                    @ticket.Status.Name
+                                </td>
+                                <td>
+                                    @ticket.TicketType.Type
+                                </td>
+                                <td>
+                                    <i class="fa fa-dot-circle-o @ticket.Priority.Name"></i>@ticket.Priority.Name
+                                </td>
+                                <td>
+                                    @ticket.Created.ToString("d")
+                                </td>
+                                <td>
+                                    @if (ticket.Updated.HasValue)
+                                    {
+                                        var updated = ticket.Updated.Value.ToString("d");
+                                        @updated
+                                    }
+                                </td>
+                                <td>
+                                    @if (ticket.AssignedUser != null)
+                                    {
+                                        @ticket.AssignedUser.UserName;
+                                    }
+                                </td>
+                                <td>
+                                    <ul class="list-unstyled">
+                                        <li><a href="@Url.Action("Edit", "Tickets", new { id = ticket.Id })">Edit</a></li>
+                                        <li><a href="@Url.Action("Details", "Tickets", new { id = ticket.Id })">View</a></li>
+                                        <li><a href="@Url.Action("Delete", "Tickets", new { id = ticket.Id })">Delete</a></li>
+                                    </ul>
+                                </td>
+                            </tr>
+                                }
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section CustomJS{
+    <!-- DataTables -->
+    <script src="../../plugins/datatables/jquery.dataTables.min.js"></script>
+    <script src="../../plugins/datatables/dataTables.bootstrap.min.js"></script>
+    <!-- SlimScroll -->
+    <script src="../../plugins/slimScroll/jquery.slimscroll.min.js"></script>
+    <!-- FastClick -->
+    <script src="../../plugins/fastclick/fastclick.min.js"></script>
+    <script>
+        $(function () {
+            $('#pTable').DataTable({
+                "aoColumns": [
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null]
+            });
+            $('#tTable').DataTable({
+                "aoColumns": [
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null]
+            });
+        });
+    </script>
+}

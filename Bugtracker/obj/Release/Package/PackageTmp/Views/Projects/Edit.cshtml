@@ -1,18 +1,15 @@
 ﻿@model Bugtracker.Models.Project
-
-@{
-    ViewBag.Title = "Edit";
+@{ 
+    Layout = null;
 }
 
-<h2>Edit</h2>
-
+<h4 class="text-center">Edit Project</h4>
+<hr />
 @using (Html.BeginForm())
 {
     @Html.AntiForgeryToken()
     
     <div class="form-horizontal">
-        <h4>Project</h4>
-        <hr />
         @Html.ValidationSummary(true, "", new { @class = "text-danger" })
         @Html.HiddenFor(model => model.Id)
 
@@ -27,7 +24,8 @@
         <div class="form-group">
             @Html.LabelFor(model => model.Status, htmlAttributes: new { @class = "control-label col-md-2" })
             <div class="col-md-10">
-                @Html.DropDownList("Status", new SelectList(ViewBag.Status, "value", "text"), new { @class="selectpicker"})
+                @*@Html.DropDownList("Status", new SelectList(ViewBag.Status, "value", "text"), new { @class="selectpicker"})*@
+                @Html.DropDownList("Status", ViewBag.Status as SelectList, new { @class = "selectpicker" })
                 @Html.ValidationMessageFor(model => model.Status, "", new { @class = "text-danger" })
             </div>
         </div>
@@ -41,13 +39,28 @@
         </div>
 
         <div class="form-group">
+            <label class="control-label col-md-2" for="users">Project Manager</label>
+            <div class="col-md-10">
+                @Html.DropDownList("UserSelected", new SelectList(ViewBag.userList, "Id", "UserName", Model.ProjectManagerId), new { @class = "form-control", Title = "Choose user to assign" })
+                @Html.ValidationMessageFor(model => model.ProjectManager, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
             <div class="col-md-offset-2 col-md-10">
+                <button data-dismiss="modal" type="button" class="btn btn-default center">Cancel</button>
                 <input type="submit" value="Save" class="btn btn-default" />
             </div>
         </div>
     </div>
 }
 
-<div>
-    @Html.ActionLink("Back to List", "Index")
-</div>
+
+@section CustomCSS {
+    <link href="~/plugins/datepicker/datepicker3.css" rel="stylesheet" />
+}
+
+@section CustomJS {
+    <script src="~/plugins/datepicker/bootstrap-datepicker.js"></script>
+    <script src="~/Scripts/Custom.js"></script>
+}

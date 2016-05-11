@@ -1,6 +1,6 @@
 ﻿$(document).ready(function() {
 
-    $('#datetimepicker').datetimepicker({
+    $('#datetimepicker').datepicker({
     });
     $('select').selectpicker();
     $("#phone").mask("(999) 999-9999");

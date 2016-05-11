@@ -1,84 +1,203 @@
 ﻿@model IEnumerable<Bugtracker.Models.Project>
+@using Microsoft.AspNet.Identity;
 
-@{
-    ViewBag.Title = "Project List";
-}
-<h2>Project List</h2>
 @Html.AntiForgeryToken()
-@if (User.Identity.IsAuthenticated && User.IsInRole("Administrator"))
-{
-<p>
-    @Html.ActionLink("Create New", "Create")
-</p>
-}
-<table class="table">
-    <tr>
-        <th>
-            Project
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Created)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Updated)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Status)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Deadline)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Tickets)
-        </th>
-        <th>
-            Users Assigned
-        </th>
-        @if (User.Identity.IsAuthenticated && User.IsInRole("Administrator"))
-        {
-        <th></th>
-        }
-    </tr>
 
-@foreach (var item in Model) {
-    <tr>
-        <td>
-            @Html.DisplayFor(modelItem => item.Name)
-        </td>
-        <td>
-            @item.Created.ToString("d")
-        </td>
-        <td>
-            @{
-                if (item.Updated.HasValue)
-                {
-                    @item.Updated.Value.ToString("d")
-                }
+<div class="row">
+    <div class="col-xs-12">
+        <div class="box">
+            <div class="box-header with-border">
+                <h3 class="box-title">Projects</h3>
+            </div><!-- /.box-header -->
+            <div class="box-body">
+                <table class="display table table-bordered table-condensed table-striped">
+                    <thead>
+                        <tr>
+                            <th>
+                                Project
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Created)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Updated)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Status)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Deadline)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Tickets)
+                            </th>
+                            <th>
+                                Project Manager
+                            </th>
+                            <th>
+                                Action
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            
+                            <tr>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Name)
+                                </td>
+                                <td>
+                                    @item.Created.ToString("d")
+                                </td>
+                                <td>
+                                    @{
+                                        if (item.Updated.HasValue)
+                                        {
+                                            var Updated = item.Updated.Value.ToString("d");
+                                            @Updated
+                                        }
+                                    }
+                                </td>
+                                <td>
+                                    <span class="label @item.Status">@Html.DisplayFor(modelItem => item.Status)</span>
+                                </td>
+                                <td>
+                                    @item.Deadline.Value.ToString("d")
+                                </td>
+                                <td>
+                                    <a href="@Url.Action("Index","Tickets", new { id = @item.Id})">@item.Tickets.Count</a>
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.ProjectManager.UserName)
+                                </td>
+                                <td>
+                                    <ul class="list-inline">
+                                        @if (User.IsInRole("Administrator"))
+                                        {
+                                            @*<li><a href="@Url.Action("Edit", "Projects", new { id = item.Id })" data-toggle="tooltip" title="Edit"><i class="fa fa-pencil"></i></a></li>*@
+                                            <li><span data-toggle="tooltip" title="Edit"><a href="@Url.Action("Edit", "Projects", new { id = item.Id })" data-toggle="modal" data-target="#edit-project"><i class="fa fa-pencil"></i></a></span></li>
+                                            <li><span data-toggle="modal" data-target="#basic"><a href="#delete" data-toggle="tooltip" data-target="#basic" class="deleteProject" id="@item.Id" title="Delete"><i class="fa fa-trash"></i></a></span></li>
+                                        }
+                                        <li><span data-toggle="tooltip" title="Create Ticket"><a href="@Url.Action("CreateTicketPartial", "Tickets", new { id = item.Id })" data-toggle="modal" data-target="#create-ticket"><i class="fa fa-plus"></i></a></span></li>
+                                    </ul>
+                                </td>
+                            </tr>
+                            }
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th>
+                                Project
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Created)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Updated)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Status)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Deadline)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Tickets)
+                            </th>
+                            <th>
+                                Project Manager
+                            </th>
+                            <th>
+                                Action
+                            </th>
+                        </tr>
+                    </tfoot>
+                </table>
+             </div>
+            @if (User.Identity.IsAuthenticated && User.IsInRole("Administrator"))
+            {
+                <a href="@Url.Action("CreateProjectPartial", "Projects")" data-toggle="modal" data-target="#create-project" class="btn btn-default pull-right"><i class="fa fa-plus"></i> New Project</a>
             }
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Status)
-        </td>
-        <td>
-            @item.Deadline.Value.ToString("d")
-        </td>
-        <td>
-            <a href="@Url.Action("Index","Tickets", new { id = @item.Id})">@item.Tickets.Count</a>
-        </td>
-        <td>
-           @foreach (var user in item.User)
-           {
-               @user.UserName<br />
-           }
-        </td>
-        @if (User.Identity.IsAuthenticated && User.IsInRole("Administrator"))
-        {
-        <td>
-            @Html.ActionLink("Edit", "Edit", new { id = item.Id }) |
-            @Html.ActionLink("Delete", "Delete", new { id = item.Id })
-        </td>
-        }
-    </tr>
+        </div>
+    </div>
+</div>
+
+<!--Delete Modal-->
+<div class="modal fade" id="basic" tabindex="-1" role="alert" aria-hidden="true" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+                <h4 class="modal-title">Delete Confirmation</h4>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete this item?
+            </div>
+            <div class="modal-footer">
+                <button data-dismiss="modal" type="button" class="btn btn-default">Cancel</button>
+                <button id="btnContinueDelete" type="button" class="btn btn-primary">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Create Project Modal-->
+<div class="modal fade" id="create-project" tabindex="-1" role="alert" aria-hidden="true" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content ticketbox">
+        </div>
+    </div>
+</div>
+
+<!--Create Ticket Modal-->
+<div class="modal fade" id="create-ticket" tabindex="-1" role="alert" aria-hidden="true" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content ticketbox">
+        </div>
+    </div>
+</div>
+
+<!--Edit Project Modal-->
+<div class="modal fade" id="edit-project" tabindex="-1" role="alert" aria-hidden="true" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content ticketbox">
+        </div>
+    </div>
+</div>
+
+@section CustomCSS{
+    <link rel="stylesheet" href="~/plugins/datatables/dataTables.bootstrap.css">
 }
 
-</table>
+@section CustomJS{
+    <!-- DataTables -->
+    <script src="~/plugins/datatables/jquery.dataTables.min.js"></script>
+    <script src="~/plugins/datatables/dataTables.bootstrap.min.js"></script>
+    <!-- SlimScroll -->
+    <script src="~/plugins/slimScroll/jquery.slimscroll.min.js"></script>
+    <!-- FastClick -->
+    <script src="~/plugins/fastclick/fastclick.min.js"></script>
+    <script>
+        $(function () {
+            $('table.display').DataTable({
+            });
+
+            var projectId;
+
+            $(".deleteProject").click(function (e) {
+                projectId = $(this).attr('id');
+            });
+
+            $('#btnContinueDelete').click(function () {
+                if (projectId != null) {
+                    window.location = "/Projects/Delete/" + projectId;
+                }
+            });
+
+            $('.modal').on('hidden.bs.modal', function (e) {
+                $(this).removeData();
+            });
+        });
+    </script>
+}

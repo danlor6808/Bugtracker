@@ -12,6 +12,8 @@ namespace Bugtracker.Models
         public string Id { get; set; }
         public MultiSelectList Roles { get; set; }
         public string[] SelectedRoles { get; set; }
+        public MultiSelectList Projects { get; set; }
+        public int[] CurrentProjects { get; set; }
     }
     public class UserViewModel
     {

@@ -1,18 +1,15 @@
 ﻿@model Bugtracker.Models.Project
-
-@{
-    ViewBag.Title = "Edit";
+@{ 
+    Layout = null;
 }
 
-<h2>Edit</h2>
-
+<h4 class="text-center">Edit Project</h4>
+<hr />
 @using (Html.BeginForm())
 {
     @Html.AntiForgeryToken()
     
     <div class="form-horizontal">
-        <h4>Project</h4>
-        <hr />
         @Html.ValidationSummary(true, "", new { @class = "text-danger" })
         @Html.HiddenFor(model => model.Id)
 
@@ -42,32 +39,28 @@
         </div>
 
         <div class="form-group">
-            <label class="control-label col-md-2" for="users">Assigned Users</label>
+            <label class="control-label col-md-2" for="users">Project Manager</label>
             <div class="col-md-10">
-                @Html.ListBox("UserSelected", new MultiSelectList(ViewBag.userList, "Id", "UserName", ViewBag.selectList), new { @class = "selectpicker", Title = "Choose users to assign" })
-                @Html.ValidationMessageFor(model => model.User, "", new { @class = "text-danger" })
+                @Html.DropDownList("UserSelected", new SelectList(ViewBag.userList, "Id", "UserName", Model.ProjectManagerId), new { @class = "form-control", Title = "Choose user to assign" })
+                @Html.ValidationMessageFor(model => model.ProjectManager, "", new { @class = "text-danger" })
             </div>
         </div>
 
         <div class="form-group">
             <div class="col-md-offset-2 col-md-10">
+                <button data-dismiss="modal" type="button" class="btn btn-default center">Cancel</button>
                 <input type="submit" value="Save" class="btn btn-default" />
             </div>
         </div>
     </div>
 }
 
-<div>
-    @Html.ActionLink("Back to List", "Index")
-</div>
 
 @section CustomCSS {
     <link href="~/plugins/datepicker/datepicker3.css" rel="stylesheet" />
-    <link href="~/Content/bootstrap-select.min.css" rel="stylesheet" />
 }
 
 @section CustomJS {
-    <script src="~/Scripts/bootstrap-select.min.js"></script>
     <script src="~/plugins/datepicker/bootstrap-datepicker.js"></script>
     <script src="~/Scripts/Custom.js"></script>
 }

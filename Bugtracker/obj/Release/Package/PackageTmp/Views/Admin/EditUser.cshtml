@@ -1,16 +1,38 @@
 ﻿@model Bugtracker.Models.AdminViewModel
 @{
-    ViewBag.Title = "EditUsers";
+    Layout = null;
 }
 
-<h2>Manage User Roles</h2>
-
+<h4 class="text-center">Edit User Roles</h4>
+<p class="text-center"><small>@Html.DisplayFor(model => model.Name)</small></p>
+<hr />
 @using (Html.BeginForm("EditUser", "Admin", FormMethod.Post))
 {
     @Html.AntiForgeryToken()
-@Html.ListBox("SelectedRoles", Model.Roles, new { @class = "selectpicker", Title="Choose between Roles"})
-    <input type="submit" value="submit" />
-    <hr />
 
-    @Html.DisplayFor(model => model.Name)
+    <div class="form-horizontal">
+        <div class="form-group">
+                <div class="col-md-12">
+                    @Html.ListBox("SelectedRoles", Model.Roles, new { @class = "selectpicker", Title = "Choose between Roles" })
+                    @*@Html.ListBox("Projects", Model.Projects, new { @class = "selectpicker", Title = "Choose between Roles" })*@
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="text-center col-md-12">
+                    <button data-dismiss="modal" type="button" class="btn btn-default center">Cancel</button>
+                    <input type="submit" value="Save" class="btn btn-primary" />
+                </div>
+            </div>
+        </div>
 }
+
+        <link href="~/dist/css/multi-select.css" rel="stylesheet" />
+
+
+        <script src="~/plugins/MultiSelect/jquery.multi-select.js"></script>
+        <script>
+            $(function () {
+                $('.selectpicker').multiSelect({});
+            });
+        </script>

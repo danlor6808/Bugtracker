@@ -11,7 +11,6 @@ namespace Bugtracker.Models
         public Project()
         {
             this.Tickets = new HashSet<Ticket>();
-            this.User = new HashSet<ApplicationUser>();
         }
         public int Id { get; set; }
         public string Name { get; set; }
@@ -19,8 +18,9 @@ namespace Bugtracker.Models
         public DateTimeOffset? Updated { get; set; }
         public string Status { get; set; }
         public DateTimeOffset? Deadline { get; set; }
+        public string ProjectManagerId { get; set; }
 
-        public virtual ICollection<ApplicationUser> User { get; set; }
+        public virtual ApplicationUser ProjectManager { get; set; }
         public virtual ICollection<Ticket> Tickets { get; set; }
     }
 }

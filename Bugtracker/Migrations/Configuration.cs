@@ -88,6 +88,41 @@ namespace Bugtracker.Migrations
             userManager.AddToRole(userId_Guest, "Project Manager");
             userManager.AddToRole(userId_Guest, "Developer");
             userManager.AddToRole(userId_Guest, "Submitter");
+
+            //Guest Developer Account
+            if (!context.Users.Any(u => u.Email == "developer@test.com"))
+            {
+                userManager.Create(new ApplicationUser
+                {
+                    UserName = "developer@test.com",
+                    Email = "developer@test.com",
+                    DisplayName = "Developer",
+                    FirstName = "guest",
+                    LastName = "account",
+                    ProfileIcon = "/upload/profileicon/default.png"
+                }, "Password1");
+            }
+
+            var userId_developer = userManager.FindByEmail("developer@test.com").Id;
+            userManager.AddToRole(userId_developer, "Developer");
+
+            //Guest Submitter Account
+            if (!context.Users.Any(u => u.Email == "submitter@test.com"))
+            {
+                userManager.Create(new ApplicationUser
+                {
+                    UserName = "submitter@test.com",
+                    Email = "submitter@test.com",
+                    DisplayName = "Submitter",
+                    FirstName = "guest",
+                    LastName = "account",
+                    ProfileIcon = "/upload/profileicon/default.png"
+                }, "Password1");
+            }
+
+            var userId_submitter = userManager.FindByEmail("submitter@test.com").Id;
+            userManager.AddToRole(userId_submitter, "Submitter");
+
         }
     }
 }

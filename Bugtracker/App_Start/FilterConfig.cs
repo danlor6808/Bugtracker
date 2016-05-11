@@ -1,4 +1,5 @@
-﻿using System.Web;
+﻿using Bugtracker.Models;
+using System.Web;
 using System.Web.Mvc;
 
 namespace Bugtracker

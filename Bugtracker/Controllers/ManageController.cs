@@ -7,15 +7,19 @@ using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
 using Bugtracker.Models;
+using System.Collections.Generic;
+using System.IO;
+using System.Web.Helpers;
 
 namespace Bugtracker.Controllers
 {
     [Authorize]
     [RequireHttps]
-    public class ManageController : Controller
+    public class ManageController : MyBaseController
     {
         private ApplicationSignInManager _signInManager;
         private manager _userManager;
+        private ApplicationDbContext db = new ApplicationDbContext();
 
         public ManageController()
         {
@@ -63,6 +67,7 @@ namespace Bugtracker.Controllers
                 : message == ManageMessageId.AddPhoneSuccess ? "Your phone number was added."
                 : message == ManageMessageId.RemovePhoneSuccess ? "Your phone number was removed."
                 : message == ManageMessageId.EditProfileSuccess ? "Changes have been submitted successfully."
+                : message == ManageMessageId.IncorrectPassword ? "Password is incorrect."
                 : "";
 
             var userId = User.Identity.GetUserId();
@@ -72,8 +77,34 @@ namespace Bugtracker.Controllers
                 PhoneNumber = await UserManager.GetPhoneNumberAsync(userId),
                 TwoFactor = await UserManager.GetTwoFactorEnabledAsync(userId),
                 Logins = await UserManager.GetLoginsAsync(userId),
-                BrowserRemembered = await AuthenticationManager.TwoFactorBrowserRememberedAsync(userId)
+                BrowserRemembered = await AuthenticationManager.TwoFactorBrowserRememberedAsync(userId),
+                User = db.Users.Find(userId)
             };
+
+            model.DisplayName = model.User.DisplayName;
+            model.FirstName = model.User.FirstName;
+            model.LastName = model.User.LastName;
+            model.PhoneNumber = model.User.PhoneNumber;
+
+            //User Role List
+            var rList = new List<string>();
+            foreach (var role in model.User.Roles)
+            {
+                var roleName = db.Roles.First(u => u.Id == role.RoleId);
+                rList.Add(roleName.Name);
+            }
+            ViewBag.RoleList = rList.ToList();
+
+            //Recently created tickets by user (top 5)
+            ViewBag.TicketList = db.Ticket.Where(u => u.AuthorId == userId).Take(5).OrderByDescending(d => d.Created).ToList();
+
+            //All tickets created by user
+            var UserTicketList = db.Ticket.Where(u => u.AuthorId == userId).ToList();
+            ViewBag.UserTickets = UserTicketList;
+            //Tickets with the status set as "complete" that belong to the user
+            ViewBag.CompletedTickets = UserTicketList.Where(u => u.StatusId == 3).ToList();
+            ViewBag.layout = "sidebar-mini sidebar-collapse fixed";
+            ViewBag.Current = "Profile";
             return View(model);
         }
 
@@ -215,19 +246,20 @@ namespace Bugtracker.Controllers
 
         //
         // GET: /Manage/EditProfile
-        public ActionResult EditProfile()
-        {
-            var user = UserManager.FindById(User.Identity.GetUserId());
-            var model = new EditProfileViewModel();
-            model.FirstName = user.FirstName;
-            model.LastName = user.LastName;
-            model.PhoneNumber = user.PhoneNumber;
-            return View(model);
-        }
+        //public ActionResult EditProfile()
+        //{
+        //    var user = UserManager.FindById(User.Identity.GetUserId());
+        //    var model = new IndexViewModel();
+        //    model.DisplayName = user.DisplayName;
+        //    model.FirstName = user.FirstName;
+        //    model.LastName = user.LastName;
+        //    model.PhoneNumber = user.PhoneNumber;
+        //    return View(model);
+        //}
 
-        [HttpPost]
+        [HttpPost, ActionName("Index")]
         [ValidateAntiForgeryToken]
-        public ActionResult EditProfile(EditProfileViewModel model)
+        public ActionResult ConfirmChanges(IndexViewModel model, HttpPostedFileBase image)
         {
             if (!ModelState.IsValid)
             {
@@ -236,6 +268,25 @@ namespace Bugtracker.Controllers
             var user = UserManager.FindById(User.Identity.GetUserId());
             if (UserManager.CheckPassword(user, model.Password))
             {
+                var path = Server.MapPath("~/upload/profileicon/"  + User.Identity.GetUserId() + "/");
+                Directory.CreateDirectory(path);
+
+                if (ImageUploadValidator.IsWebFriendlyImage(image))
+                {
+                    WebImage img = new WebImage(image.InputStream);
+                    if (img.Width != 128)
+                    {
+                        img.Resize(128, 128, false);
+                    }
+
+                    var fileName = string.Format(Guid.NewGuid() + Path.GetExtension(image.FileName));
+                    //image.SaveAs(Path.Combine(path, fileName));
+                    var imgPath = Path.Combine(path, fileName);
+                    img.Save(imgPath);
+                    user.ProfileIcon = Path.Combine("/upload/profileicon/", User.Identity.GetUserId(), fileName);
+                }
+
+                user.DisplayName = model.DisplayName;
                 user.FirstName = model.FirstName;
                 user.LastName = model.LastName;
                 user.PhoneNumber = model.PhoneNumber;
@@ -243,10 +294,10 @@ namespace Bugtracker.Controllers
             }
             else
             {
-                ViewBag.StatusMessage = "Incorrect Password";
-                return View(model);
+                ViewBag.tColor = "danger";
+                return RedirectToAction("Index", new { Message = ManageMessageId.IncorrectPassword});
             }
-            
+            ViewBag.tColor = "success";
             return RedirectToAction("Index", new { Message = ManageMessageId.EditProfileSuccess });
         }
         //
@@ -418,7 +469,8 @@ namespace Bugtracker.Controllers
             RemoveLoginSuccess,
             RemovePhoneSuccess,
             Error,
-            EditProfileSuccess
+            EditProfileSuccess,
+            IncorrectPassword
         }
 
 #endregion

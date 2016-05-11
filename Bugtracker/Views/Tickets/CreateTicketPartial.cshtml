@@ -1,0 +1,76 @@
+﻿@model Bugtracker.Models.Ticket
+
+@{ 
+    Layout = null;
+}
+
+<!--Create Ticket-->
+                @using (Html.BeginForm())
+                {
+                    @Html.AntiForgeryToken()
+
+                    <div class="form-horizontal">
+                        <h3 style="text-align: center">Create a new ticket</h3>
+                        @if (ViewBag.ProjectName != null)
+                        {
+                        <h5 style="text-align: center">For : @ViewBag.ProjectName</h5>
+                        }
+                        <hr />
+                        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                        <div class="form-group">
+                            @Html.LabelFor(model => model.Title, htmlAttributes: new { @class = "control-label col-md-2" })
+                            <div class="col-md-10">
+                                @Html.EditorFor(model => model.Title, new { htmlAttributes = new { @class = "form-control" } })
+                                @Html.ValidationMessageFor(model => model.Title, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label col-md-2" for="Body">Description</label>
+                            <div class="col-md-10">
+                                @Html.EditorFor(model => model.Body, new { htmlAttributes = new { @class = "form-control" } })
+                                @Html.ValidationMessageFor(model => model.Body, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label col-md-2" for="TicketTypeId">Type</label>
+                            <div class="col-md-10">
+                                @Html.DropDownList("TicketTypeId", ViewBag.TicketType as SelectList, htmlAttributes: new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.TicketTypeId, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label col-md-2" for="PriorityId">Priority</label>
+                            <div class="col-md-10">
+                                @Html.DropDownList("PriorityId", ViewBag.TicketPriority as SelectList, htmlAttributes: new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.PriorityId, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        @if (ViewBag.Bool == true)
+                        {
+                            <div class="form-group">
+                                <label class="control-label col-md-2" for="ProjectId">Project</label>
+                                <div class="col-md-10">
+                                    @Html.DropDownList("ProjectId", ViewBag.ProjectList as SelectList, htmlAttributes: new { @class = "form-control" })
+                                    @Html.ValidationMessageFor(model => model.ProjectId, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            @Html.HiddenFor(model => model.ProjectId)
+                            @Html.HiddenFor(model => model.Project)
+                        }
+                        <hr />
+                        <div class="form-group">
+                            <div class="col-md-12" style="text-align: center">
+                                <button data-dismiss="modal" type="button" class="btn btn-default center">Cancel</button>
+                                <input type="submit" value="Create" class="btn btn-default center" dismiss="modal" />
+                            </div>
+                        </div>
+                    </div>
+                }

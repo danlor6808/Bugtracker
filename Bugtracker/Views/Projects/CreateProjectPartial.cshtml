@@ -1,0 +1,50 @@
+﻿@model Bugtracker.Models.Project
+@{
+    Layout = null;
+}
+
+<!--Create Project-->
+@using (Html.BeginForm()) 
+{
+    @Html.AntiForgeryToken()
+    
+    <div class="form-horizontal">
+        <h3 style="text-align: center">Create a new project</h3>
+        <hr />
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        <div class="form-group">
+            @Html.LabelFor(model => model.Name, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.Name, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.Name, "", new { @class = "text-danger" })
+            </div>
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(model => model.Deadline, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.Deadline, new { htmlAttributes = new { @class = "form-control", id = "datetimepicker" } })
+                @Html.ValidationMessageFor(model => model.Deadline, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="control-label col-md-2" for="users">Project Manager</label>
+            <div class="col-md-10">
+                @Html.DropDownList("UserSelected", new SelectList(ViewBag.userList, "Id", "UserName", ViewBag.selectList), new { @class = "form-control", Title = "Choose user to assign" })
+                @Html.ValidationMessageFor(model => model.ProjectManager, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-12" style="text-align: center">
+                <button data-dismiss="modal" type="button" class="btn btn-default center">Cancel</button>
+                <input type="submit" value="Create" class="btn btn-default" />
+            </div>
+        </div>
+    </div>
+}
+
+<link href="~/plugins/datepicker/datepicker3.css" rel="stylesheet" />
+
+<script src="~/plugins/datepicker/bootstrap-datepicker.js"></script>
+<script src="~/Scripts/Custom.js"></script>

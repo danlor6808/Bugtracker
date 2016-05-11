@@ -1,89 +1,224 @@
 ﻿@model Bugtracker.Models.IndexViewModel
-@{
-    ViewBag.Title = "Manage";
-}
 
-<h2>@ViewBag.Title.</h2>
 
-<p class="text-success">@ViewBag.StatusMessage</p>
-<div>
-    <h4>Change your account settings</h4>
-    <hr />
-    <dl class="dl-horizontal">
-        <dt>Profile:</dt>
-        <dd>
-            [
-            @Html.ActionLink("Edit Your Profile", "EditProfile") ]
-        </dd>
-        <dt>Password:</dt>
-        <dd>
-            [
-            @if (Model.HasPassword)
-            {
-                @Html.ActionLink("Change your password", "ChangePassword")
-            }
-            else
-            {
-                @Html.ActionLink("Create", "SetPassword")
-            }
-            ]
-        </dd>
-        <dt>External Logins:</dt>
-        <dd>
-            @Model.Logins.Count [
-            @Html.ActionLink("Manage", "ManageLogins") ]
-        </dd>
-        @*
-            Phone Numbers can used as a second factor of verification in a two-factor authentication system.
-             
-             See <a href="http://go.microsoft.com/fwlink/?LinkId=403804">this article</a>
-                for details on setting up this ASP.NET application to support two-factor authentication using SMS.
-             
-             Uncomment the following block after you have set up two-factor authentication
-        *@
-        @*  
-            <dt>Phone Number:</dt>
-            <dd>
-                @(Model.PhoneNumber ?? "None") [
-                @if (Model.PhoneNumber != null)
-                {
-                    @Html.ActionLink("Change", "AddPhoneNumber")
-                    @: &nbsp;|&nbsp;
-                    @Html.ActionLink("Remove", "RemovePhoneNumber")
-                }
-                else
-                {
-                    @Html.ActionLink("Add", "AddPhoneNumber")
-                }
-                ]
-            </dd>
-        *@
-        <dt>Two-Factor Authentication:</dt>
-        <dd>
-            <p>
-                There are no two-factor authentication providers configured. See <a href="http://go.microsoft.com/fwlink/?LinkId=403804">this article</a>
-                for details on setting up this ASP.NET application to support two-factor authentication.
-            </p>
-            @*@if (Model.TwoFactor)
-                {
-                    using (Html.BeginForm("DisableTwoFactorAuthentication", "Manage", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+    <div class="col-lg-12">
+        <div class="col-md-3">
+            <!-- Profile Image -->
+            <div class="box box-primary">
+                <div class="box-body box-profile">
+                    <img class="profile-user-img img-responsive img-circle" src="@Model.User.ProfileIcon" alt="User profile picture">
+                    <h3 class="profile-username text-center">@Model.User.DisplayName</h3>
+                    <p class="text-center">
+                        @if (Model.HasPassword)
+                        {
+                            @:[ <a href="@Url.Action("ChangePassword", "Manage")" data-toggle="modal" data-target="#change-pw">Change Your Password</a> ]
+                        }
+                    </p>
+
+                    <p class="text-muted text-center">
+                        @foreach (var role in ViewBag.RoleList)
+                        {
+                            @role <br />
+                        }
+                    </p>
+                    <ul class="list-group list-group-unbordered">
+                        <li class="list-group-item">
+                            <b>Tickets Created</b> <a class="pull-right" href="@Url.Action("Index","Tickets")">@ViewBag.UserTickets.Count</a>
+                        </li>
+                        <li class="list-group-item">
+                            <b>Completed Tickets</b> <a class="pull-right">@ViewBag.CompletedTickets.Count</a>
+                        </li>
+                    </ul>
+                    <p class="text-@ViewBag.tColor text-center">@ViewBag.StatusMessage</p>
+                </div><!-- /.box-body -->
+            </div><!-- /.box -->
+        </div>
+
+        <div class="col-md-9">
+            <!-- Profile Image -->
+                <div class="nav-tabs-custom">
+                    <ul class="nav nav-tabs">
+                        <li class="active"><a href="#recent-tickets" data-toggle="tab">Recent Tickets</a></li>
+                        <li><a href="#timeline" data-toggle="tab">Timeline</a></li>
+                        <li><a href="#settings" data-toggle="tab">Settings</a></li>
+                    </ul>
+                
+        <div class="tab-content">
+            <div class="active tab-pane" id="recent-tickets">
+                <table class="display table table-responsive table-bordered table-condensed table-striped">
+                    <thead>
+                        <tr>
+                            <th>
+                                Ticket
+                            </th>
+                            <th>
+                                Created
+                            </th>
+                            <th>
+                                Status
+                            </th>
+                            <th>
+                                Developer
+                            </th>
+                            <th>
+                                Action
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in ViewBag.TicketList)
+                        {
+                            <tr>
+                                <td>
+                                    @item.Title
+                                </td>
+                                <td>
+                                    @item.Created.ToString("d")
+                                </td>
+                                <td>
+                                    <span class="label @item.Status.Name">@item.Status.Name</span>
+                                </td>
+                                <td>
+                                    @if (@item.AssignedUser != null)
+                                    {
+                                        @item.AssignedUser.UserName
+                                    }
+                                </td>
+                                <td>
+                                    <ul class="list-inline">
+                                        <li><a href="@Url.Action("Edit", "Tickets", new { id = item.Id })" data-toggle="tooltip" title="Edit"><i class="fa fa-pencil"></i></a></li>
+                                        <li><a href="@Url.Action("Details", "Tickets", new { id = item.Id })" data-toggle="tooltip" title="View"><i class="fa fa-eye"></i></a></li>
+                                    </ul>
+                                </td>
+                            </tr>
+
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="tab-pane" id="timeline">
+                </div>
+                <div class="tab-pane" id="settings">
+                    @*<form class="form-horizontal">
+                        <div class="form-group">
+                            <label for="inputName" class="col-sm-2 control-label">Name</label>
+                            <div class="col-sm-10">
+                                <input type="email" class="form-control" id="inputName" placeholder="Name">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="inputEmail" class="col-sm-2 control-label">Email</label>
+                            <div class="col-sm-10">
+                                <input type="email" class="form-control" id="inputEmail" placeholder="Email">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="inputName" class="col-sm-2 control-label">Name</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="inputName" placeholder="Name">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="inputExperience" class="col-sm-2 control-label">Experience</label>
+                            <div class="col-sm-10">
+                                <textarea class="form-control" id="inputExperience" placeholder="Experience"></textarea>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="inputSkills" class="col-sm-2 control-label">Skills</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="inputSkills" placeholder="Skills">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-offset-2 col-sm-10">
+                                <div class="checkbox">
+                                    <label>
+                                        <input type="checkbox"> I agree to the <a href="#">terms and conditions</a>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-offset-2 col-sm-10">
+                                <button type="submit" class="btn btn-danger">Submit</button>
+                            </div>
+                        </div>
+                    </form>*@
+
+                    @using (Html.BeginForm("Index", "Manage", FormMethod.Post, new { @class = "form-horizontal", role = "form", enctype = "Multipart/form-data" }))
                     {
                         @Html.AntiForgeryToken()
-                        <text>Enabled
-                        <input type="submit" value="Disable" class="btn btn-link" />
-                        </text>
+                        @Html.ValidationSummary("", new { @class = "text-danger" })
+                        <div class="form-group">
+                            @Html.LabelFor(m => m.DisplayName, new { @class = "col-sm-2 control-label" })
+                            <div class="col-sm-10">
+                                @Html.TextBoxFor(m => m.DisplayName, new { @class = "form-control" })
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            @Html.LabelFor(m => m.FirstName, new { @class = "col-sm-2 control-label" })
+                            <div class="col-sm-10">
+                                @Html.TextBoxFor(m => m.FirstName, new { @class = "form-control" })
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            @Html.LabelFor(m => m.LastName, new { @class = "col-sm-2 control-label" })
+                            <div class="col-sm-10">
+                                @Html.TextBoxFor(m => m.LastName, new { @class = "form-control" })
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            @Html.LabelFor(m => m.PhoneNumber, new { @class = "col-sm-2 control-label" })
+                            <div class="col-sm-10">
+                                @Html.TextBoxFor(m => m.PhoneNumber, new { @class = "form-control", id = "phone" })
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-sm-2">Profile Icon</label>
+                            <div class="col-sm-10">
+                                <input type="file" id ="image" name="image" class="form-control" accept="image/*">
+                                <small class="text-muted">For best results, please choose an image with dimension size 128 x 128</small>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            @Html.LabelFor(m => m.Password, new { @class = "col-sm-2 control-label" })
+                            <div class="col-sm-10">
+                                @*@Html.PasswordFor(m => m.Password, new { @class = "form-control" })*@
+                                <input class="form-control" type="Password" name="Password" id="Password"  placeholder="Confirm Password" required />
+                                @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-offset-2 col-sm-10">
+                                <input type="submit" value="Submit Changes" class="btn btn-danger" />
+                            </div>
+                        </div>
                     }
-                }
-                else
-                {
-                    using (Html.BeginForm("EnableTwoFactorAuthentication", "Manage", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
-                    {
-                        @Html.AntiForgeryToken()
-                        <text>Disabled
-                        <input type="submit" value="Enable" class="btn btn-link" />
-                        </text>
-                    }
-                }*@
-        </dd>
-    </dl>
+                </div><!-- /.tab-pane -->
+            </div>
+            </div>
+            </div><!-- /.box -->
+        </div>
+
+<!--Change Password Modal-->
+<div class="modal fade" id="change-pw" tabindex="-1" role="alert" aria-hidden="true" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content ticketbox">
+        </div>
+    </div>
 </div>
+
+@section CustomJS {
+    <script src="~/Scripts/jQuery-MaskedInput.js"></script>
+    <script>
+        $(document).ready(function () {
+            $("#phone").mask("(999) 999-9999");
+
+            $("#image").on("change", function () {
+
+
+            })
+        });
+    </script>
+}

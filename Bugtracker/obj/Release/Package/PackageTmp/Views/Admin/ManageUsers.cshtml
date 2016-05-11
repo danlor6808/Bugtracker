@@ -1,59 +1,123 @@
 ﻿@model IEnumerable<Bugtracker.Models.UserViewModel>
 
-@{
-    ViewBag.Title = "Manage Users";
+@Html.AntiForgeryToken()
+<div class="row">
+    <div class="col-xs-12">
+        <div class="box">
+            <div class="box-header">
+                <h3 class="box-title">Users</h3>
+            </div><!-- /.box-header -->
+            <div class="box-body">
+                <table id="tTable" class="display table table-bordered table-condensed table-striped">
+                    <thead>
+                        <tr>
+                            <th>
+                                DisplayName
+                            </th>
+                            <th>
+                                First Name
+                            </th>
+                            <th>
+                                Last Name
+                            </th>
+                            <th>
+                                E-mail
+                            </th>
+                            <th>
+                                User Roles
+                            </th>
+                            <th>
+                                Action
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+            {
+                            <tr>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.user.DisplayName)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.user.FirstName)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.user.LastName)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.user.Email)
+                                </td>
+                                <td>
+                                    @foreach (var role in item.roles)
+                                    {
+                                        @role<br />
+                                    }
+                                </td>
+                                <td>
+                                    <ul class="list-unstyled">
+                                        @*<li>@Html.ActionLink("Manage", "EditUser", new { id = item.user.Id })</li>*@
+                                        <li><span data-toggle="tooltip" title="Edit User Roles"><a href="@Url.Action("EditUser", "Admin", new { id = item.user.Id })" data-toggle="modal" data-target="#edit-role"><i class="fa fa-pencil"></i></a></span></li>
+                                    </ul>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th>
+                                Display Name
+                            </th>
+                            <th>
+                                First Name
+                            </th>
+                            <th>
+                                Last Name
+                            </th>
+                            <th>
+                                E-mail
+                            </th>
+                            <th>
+                                User Roles
+                            </th>
+                            <th>
+                                Action
+                            </th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            </div>
+        </div>
+    </div>
+
+<!--Edit-role Modal-->
+<div class="modal fade" id="edit-role" tabindex="-1" role="alert" aria-hidden="true" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content ticketbox">
+        </div>
+    </div>
+</div>
+
+@section CustomCSS{
+    <link rel="stylesheet" href="~/plugins/datatables/dataTables.bootstrap.css">
 }
 
-<h2>Manage Users</h2>
-@Html.AntiForgeryToken()
-<div>
-        <table class="table">
-            <tr>
-                <th>
-                    First Name
-                </th>
-                <th>
-                    Last Name
-                </th>
-                <th>
-                    E-mail
-                </th>
-                <th>
-                    User Roles
-                </th>
-                <th>
-                    Projects Assigned
-                </th>
-                <th></th>
-            </tr>
+@section CustomJS{
+    <!-- DataTables -->
+    <script src="~/plugins/datatables/jquery.dataTables.min.js"></script>
+    <script src="~/plugins/datatables/dataTables.bootstrap.min.js"></script>
+    <!-- SlimScroll -->
+    <script src="~/plugins/slimScroll/jquery.slimscroll.min.js"></script>
+    <!-- FastClick -->
+    <script src="~/plugins/fastclick/fastclick.min.js"></script>
+    <script>
+        $(function () {
+            $('table.display').DataTable({
+            });
 
-            @foreach (var item in Model)
-            {
-                <tr>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.user.FirstName)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.user.LastName)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.user.Email)
-                    </td>
-                    <td>
-                        @foreach (var role in item.roles)
-                        {
-                            @role<br />
-                        }
-                    </td>
-                    <td>
-                        Work in Progress
-                    </td>
-                    <td>
-                        <ul class="list-unstyled">
-                            <li>@Html.ActionLink("Edit", "EditUser", new { id = item.user.Id })</li>
-                        </ul>
-                    </td>
-                </tr>
-            }
-            </table>
-</div>
+            $('.modal').on('hidden.bs.modal', function (e) {
+                $(this).removeData();
+            });
+        });
+    </script>
+}

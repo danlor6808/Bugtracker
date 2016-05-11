@@ -1,17 +1,11 @@
 ﻿@model Bugtracker.Models.Project
 
-@{
-    ViewBag.Title = "Create";
-}
-
-<h2>Create</h2>
-
 @using (Html.BeginForm()) 
 {
     @Html.AntiForgeryToken()
     
-    <div class="form-horizontal">
-        <h4>Project</h4>
+    <div class="form-horizontal col-md-6 col-md-offset-3">
+
         <hr />
         @Html.ValidationSummary(true, "", new { @class = "text-danger" })
         <div class="form-group">
@@ -30,6 +24,14 @@
         </div>
 
         <div class="form-group">
+            <label class="control-label col-md-2" for="users">Project Manager</label>
+            <div class="col-md-10">
+                @Html.DropDownList("UserSelected", new SelectList(ViewBag.userList, "Id", "UserName", ViewBag.selectList), new { @class = "form-control", Title = "Choose user to assign" })
+                @Html.ValidationMessageFor(model => model.ProjectManager, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
             <div class="col-md-offset-2 col-md-10">
                 <input type="submit" value="Create" class="btn btn-default" />
             </div>
@@ -38,7 +40,7 @@
 }
 
 <div>
-    @Html.ActionLink("Back to List", "Index")
+    @Html.ActionLink("Back to list", "UserPanel", "Home")
 </div>
 
 @section CustomCSS {

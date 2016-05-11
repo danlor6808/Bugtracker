@@ -14,7 +14,7 @@ namespace Bugtracker.Controllers
 {
     [Authorize]
     [RequireHttps]
-    public class AccountController : Controller
+    public class AccountController : MyBaseController
     {
         private ApplicationSignInManager _signInManager;
         private manager _userManager;
@@ -54,10 +54,34 @@ namespace Bugtracker.Controllers
             }
         }
 
+        [AllowAnonymous]
+        public async Task<ActionResult> GuestUserLogin(int? guestid)
+        {
+            if (guestid != null)
+            {
+                switch (guestid)
+                {
+                    case 1:
+                        await SignInManager.PasswordSignInAsync("submitter@test.com", "Password1", false, shouldLockout: false);
+                        return RedirectToAction("Index", "Home");
+                    case 2:
+                        await SignInManager.PasswordSignInAsync("developer@test.com", "Password1", false, shouldLockout: false);
+                        return RedirectToAction("Index", "Home");
+                    case 3:
+                        await SignInManager.PasswordSignInAsync("projectmanager@test.com", "Augusttr6019!", false, shouldLockout: false);
+                        return RedirectToAction("Index", "Home");
+                    case 4:
+                        await SignInManager.PasswordSignInAsync("guest@123.com", "guest@123.com", false, shouldLockout: false);
+                        return RedirectToAction("Index", "Home");
+                }
+            }
+            return RedirectToAction("Index", "Home");
+        }
+
         //
         // GET: /Account/Login
         [AllowAnonymous]
-        public ActionResult Login(string returnUrl)
+        public ActionResult Login(string returnUrl, int? guestid)
         {
             ViewBag.ReturnUrl = returnUrl;
             return View();
@@ -153,7 +177,7 @@ namespace Bugtracker.Controllers
         {
             if (ModelState.IsValid)
             {
-                var user = new ApplicationUser { UserName = model.Email, Email = model.Email };
+                var user = new ApplicationUser { UserName = model.Email, Email = model.Email, DisplayName = model.DisplayName, ProfileIcon = "/upload/profileicon/default.png" };
                 var result = await UserManager.CreateAsync(user, model.Password);
 
                 var helper = new UserRolesHelper(db);

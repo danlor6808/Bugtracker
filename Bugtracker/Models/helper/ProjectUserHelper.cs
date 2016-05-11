@@ -17,42 +17,42 @@ namespace Bugtracker.Models
             this.db = context;
         }
 
-        public List<string> currentProjectUsers (int id)
-        {
-            var project = db.Project.Find(id).User;
-            var result = new List<string>();
-            foreach (var user in project)
-            {
-                result.Add(user.Id);
-            }
-            return result;
-        }
+        //public List<string> currentProjectUsers (int id)
+        //{
+        //    var project = db.Project.Find(id).User;
+        //    var result = new List<string>();
+        //    foreach (var user in project)
+        //    {
+        //        result.Add(user.Id);
+        //    }
+        //    return result;
+        //}
 
-        public bool deleteAllUsers (int id)
-        {
-            var project = db.Project.Find(id).User;
-            foreach (var user in project)
-            {
-                project.Remove(user);
-            }
-            return true;
-        }
+        //public bool deleteAllUsers (int id)
+        //{
+        //    var project = db.Project.Find(id).User;
+        //    foreach (var user in project)
+        //    {
+        //        project.Remove(user);
+        //    }
+        //    return true;
+        //}
 
-        public bool removeProjectUser (int projectid, string userid)
-        {
-            var project = db.Project.Find(projectid);
-            var user = project.User.First(u => u.Id == userid);
-            var result = project.User.Remove(user);
-            return result;
-        }
+        //public bool removeProjectUser (int projectid, string userid)
+        //{
+        //    var project = db.Project.Find(projectid);
+        //    var user = project.User.First(u => u.Id == userid);
+        //    var result = project.User.Remove(user);
+        //    return result;
+        //}
 
-        public bool addProjectUser(int projectid, string userid)
-        {
-            var project = db.Project.Find(projectid);
-            var user = db.Users.First(u => u.Id == userid);
-            project.User.Add(user);
-            return true;
-        }
+        //public bool addProjectUser(int projectid, string userid)
+        //{
+        //    var project = db.Project.Find(projectid);
+        //    var user = db.Users.First(u => u.Id == userid);
+        //    project.User.Add(user);
+        //    return true;
+        //}
 
         public SelectListItem[] statuslist (int projectId)
         {

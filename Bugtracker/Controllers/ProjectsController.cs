@@ -14,20 +14,42 @@ namespace Bugtracker.Controllers
 {
     [Authorize]
     [RequireHttps]
-    public class ProjectsController : Controller
+    public class ProjectsController : MyBaseController
     {
         private ApplicationDbContext db = new ApplicationDbContext();
         
 
         // GET: Projects
-        public ActionResult Index()
+        public ActionResult Index(string view)
         {
-            return View(db.Project.ToList());
+            ViewBag.Header = "Projects";
+            ViewBag.layout = "sidebar-mini sidebar-collapse fixed";
+            ViewBag.Current = "Projects";
+            var list = new List<Project>();
+            if (view == "all")
+            {
+                list = db.Project.ToList();
+                return View(list);
+            }
+            if (User.IsInRole("Administrator"))
+            {
+                list = db.Project.ToList();
+            }
+            else
+            {
+                var user = db.Users.Find(User.Identity.GetUserId());
+                list = user.Projects.ToList();
+                //list = db.Project.Where(u => u.User.Any(t => t.Id == user.Id)).ToList();
+            }
+            return View(list);
         }
 
         // GET: Projects/Details/5
         public ActionResult Details(int? id)
         {
+            ViewBag.Header = "Details";
+            ViewBag.layout = "sidebar-mini sidebar-collapse fixed";
+            ViewBag.Current = "Projects";
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
@@ -44,6 +66,12 @@ namespace Bugtracker.Controllers
         [Authorize(Roles = "Administrator")]
         public ActionResult Create()
         {
+            ViewBag.Header = "Create a project";
+            ViewBag.layout = "sidebar-mini sidebar-collapse fixed";
+            ViewBag.Current = "Projects";
+            var pmId = db.Roles.First(u => u.Name == "Project Manager");
+            //List of all users that are project managers
+            ViewBag.userList = db.Users.Where(u => u.Roles.Any(r => r.RoleId == pmId.Id));
             return View();
         }
 
@@ -53,7 +81,7 @@ namespace Bugtracker.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Administrator")]
-        public ActionResult Create([Bind(Include = "Id,Name,Deadline")] Project project)
+        public ActionResult Create([Bind(Include = "Id,Name,Deadline")] Project project, string UserSelected)
         {
             if (ModelState.IsValid)
             {
@@ -64,6 +92,7 @@ namespace Bugtracker.Controllers
                 }
                 project.Created = System.DateTimeOffset.Now;
                 project.Status = "Open";
+                project.ProjectManagerId = UserSelected;
                 db.Project.Add(project);
                 db.SaveChanges();
                 return RedirectToAction("Index");
@@ -73,9 +102,12 @@ namespace Bugtracker.Controllers
         }
 
         // GET: Projects/Edit/5
-        [Authorize(Roles = "Administrator")]
+        [Authorize(Roles = "Project Manager")]
         public ActionResult Edit(int? id)
         {
+            ViewBag.Header = "Edit";
+            ViewBag.layout = "sidebar-mini sidebar-collapse fixed";
+            ViewBag.Current = "Projects";
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
@@ -89,10 +121,9 @@ namespace Bugtracker.Controllers
             ProjectUserHelper helper = new ProjectUserHelper(db);
             //Status list
             ViewBag.Status = helper.statuslist(project.Id);
-            //List of all users
-            ViewBag.userList = db.Users.ToList();
-            //List of all projects that user current has
-            ViewBag.selectList = project.User.Select(n => n.Id).ToList();
+            var pmId= db.Roles.First(u => u.Name == "Project Manager");
+            //List of all users that are project managers
+            ViewBag.userList = db.Users.Where(u => u.Roles.Any(r => r.RoleId == pmId.Id));
 
             return View(project);
         }
@@ -102,40 +133,21 @@ namespace Bugtracker.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Administrator")]
-        public ActionResult Edit([Bind(Include = "Id,Name,Updated,Status,Deadline")] Project project, List<string> UserSelected)
+        [Authorize(Roles = "Project Manager")]
+        public ActionResult Edit([Bind(Include = "Id,Name,Updated,Status,Deadline")] Project project, string UserSelected)
         {
             if (ModelState.IsValid)
             {
                 var currentProject = db.Project.Find(project.Id);
                 var allUsers = db.Users.ToList();
                 var helper = new ProjectUserHelper(db);
-                project.Updated = DateTimeOffset.Now;
-                currentProject.User = project.User;
+                currentProject.Updated = DateTimeOffset.Now;
                 currentProject.Name = project.Name;
                 currentProject.Status = project.Status;
                 currentProject.Deadline = project.Deadline;
+                currentProject.ProjectManagerId = UserSelected;
 
-                //Removes all users if there are any
-                if (project.User != null)
-                {
-                    foreach (var user in allUsers)
-                    {
-                        if (db.Project.Find(project.Id).User.Any(u => u.Id == user.Id))
-                        {
-                            helper.removeProjectUser(project.Id, user.Id);
-                        }
-                    }
-                }
-
-                //Adds users if any are selected from the multiselect box
-                if (UserSelected != null)
-                {
-                    foreach (var id in UserSelected)
-                    {
-                        helper.addProjectUser(project.Id, id);
-                    }
-                }
+                var pmId = db.Roles.First(u => u.Name == "Project Manager");
 
                 //Checks if Project name is empty and throws an error if true
                 if (String.IsNullOrWhiteSpace(project.Name))
@@ -144,10 +156,8 @@ namespace Bugtracker.Controllers
 
                     //Status list
                     ViewBag.Status = helper.statuslist(project.Id);
-                    //List of all users
-                    ViewBag.userList = db.Users.ToList();
-                    //List of all projects that user current has
-                    ViewBag.selectList = project.User.Select(n => n.Id).ToList();
+                    //List of all users that are project managers
+                    ViewBag.userList = db.Users.Where(u => u.Roles.Any(r => r.RoleId == pmId.Id));
                     return View(project);
                 }
 
@@ -161,10 +171,8 @@ namespace Bugtracker.Controllers
 
                         //Status list
                         ViewBag.Status = helper.statuslist(project.Id);
-                        //List of all users
-                        ViewBag.userList = db.Users.ToList();
-                        //List of all projects that user current has
-                        ViewBag.selectList = project.User.Select(n => n.Id).ToList();
+                        //List of all users that are project managers
+                        ViewBag.userList = db.Users.Where(u => u.Roles.Any(r => r.RoleId == pmId.Id));
                         return View(project);
                     }
                 }
@@ -180,6 +188,9 @@ namespace Bugtracker.Controllers
         [Authorize(Roles = "Administrator")]
         public ActionResult Delete(int? id)
         {
+            ViewBag.Header = "Delete";
+            ViewBag.layout = "sidebar-mini sidebar-collapse fixed";
+            ViewBag.Current = "Projects";
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
@@ -189,27 +200,55 @@ namespace Bugtracker.Controllers
             {
                 return HttpNotFound();
             }
-            return View(project);
-        }
-
-        // POST: Projects/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public ActionResult DeleteConfirmed(int id)
-        {
-            Project project = db.Project.Find(id);
             db.Project.Remove(project);
             db.SaveChanges();
-            return RedirectToAction("Index");
+            ViewBag.StatusMessage = "Project has been successfully deleted";
+            return RedirectToAction("Index", "Projects");
         }
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing)
+            if (disposing) 
             {
                 db.Dispose();
             }
             base.Dispose(disposing);
+        }
+
+        //Create Project Partial
+        // GET: Projects/Create
+        [Authorize(Roles = "Administrator")]
+        public ActionResult CreateProjectPartial()
+        {
+            ViewBag.Header = "Create a project";
+            ViewBag.layout = "sidebar-mini";
+            var pmId = db.Roles.First(u => u.Name == "Project Manager");
+            //List of all users that are project managers
+            ViewBag.userList = db.Users.Where(u => u.Roles.Any(r => r.RoleId == pmId.Id));
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Administrator")]
+        public ActionResult CreateProjectPartial([Bind(Include = "Id,Name,Deadline")] Project project, string UserSelected)
+        {
+            if (ModelState.IsValid)
+            {
+                if (db.Project.Any(p => p.Name == project.Name))
+                {
+                    ModelState.AddModelError("Name", "The title must be unique.");
+                    return View(project);
+                }
+                project.Created = System.DateTimeOffset.Now;
+                project.Status = "Open";
+                project.ProjectManagerId = UserSelected;
+                db.Project.Add(project);
+                db.SaveChanges();
+                return RedirectToAction("Index");
+            }
+
+            return View(project);
         }
     }
 }

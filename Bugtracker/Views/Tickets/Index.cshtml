@@ -1,96 +1,223 @@
 ﻿@model IEnumerable<Bugtracker.Models.Ticket>
+@using Microsoft.AspNet.Identity;
 
-@{
-    ViewBag.Title = "Index";
+<div class="row">
+    <div class="col-xs-12">
+        <div class="box">
+            <div class="box-header with-border">
+                <h3 class="box-title">Tickets</h3>
+            </div><!-- /.box-header -->
+            <div class="box-body">
+                <table class="display table table-bordered table-condensed table-striped">
+                    <thead>
+                        <tr>
+                            <th>
+                                Project Name
+                            </th>
+                            <th>
+                                Author
+                            </th>
+                            <th>
+                                Title
+                            </th>
+                            <th>
+                                Status
+                            </th>
+                            <th>
+                                Type
+                            </th>
+                            <th>
+                                Priority
+                            </th>
+                            <th>
+                                Created
+                            </th>
+                            <th>
+                                Updated
+                            </th>
+                            <th>
+                                Developer Assigned
+                            </th>
+                            <th>
+                                Action   
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>
+                                    @*<a href="@Url.Action("Details", "Projects", new { id = item.ProjectId})">@Html.DisplayFor(modelItem => item.Project.Name)</a>*@
+                                    @Html.DisplayFor(modelItem => item.Project.Name)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Author.UserName)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Title)
+                                </td>
+                                <td>
+                                    <span class="label @item.Status.Name">@Html.DisplayFor(modelItem => item.Status.Name)</span>
+                                </td>
+                                <td>
+                                    @item.TicketType.Type
+                                </td>
+                                <td>
+                                    <span class="label @item.Priority.Name">@item.Priority.Name</span>
+                                </td>
+                                <td>
+                                    @item.Created.ToString("d")
+                                </td>
+                                <td>
+                                    @if (item.Updated.HasValue)
+                                    {
+                                        var updated = item.Updated.Value.ToString("d");
+                                        @updated
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.AssignedUser != null)
+                                    {
+                                        @item.AssignedUser.UserName;
+                                    }
+                                </td>
+                                <td>
+
+                                    <ul class="list-inline">
+                                        @if (item.AuthorId == User.Identity.GetUserId() || item.Project.ProjectManagerId == User.Identity.GetUserId() || item.AssignedUserId == User.Identity.GetUserId() || User.IsInRole("Administrator"))
+                                        {
+                                            if (User.IsInRole("Administrator") || item.StatusId != 3)
+                                            {
+                                                <li><span data-toggle="tooltip" title="Edit"><a href="@Url.Action("Edit", "Tickets", new { id = item.Id })" data-toggle="modal" data-target="#edit-ticket"><i class="fa fa-pencil"></i></a></span></li>
+                                            }
+                                            if (User.Identity.IsAuthenticated && User.IsInRole("Administrator"))
+                                            {
+                                                <li><span data-toggle="tooltip" data-title="Delete"><a href="#deleteticket" data-toggle="modal" data-target="#basic" class="deleteTicket" id="@item.Id"><i class="fa fa-trash"></i></a></span></li>
+                                            }
+                                        }
+                                        <li><a href="@Url.Action("Details", "Tickets", new { id = item.Id })" data-toggle="tooltip" title="View"><i class="fa fa-eye"></i></a></li>
+                                    </ul>
+                                    
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th>
+                                Project Name
+                            </th>
+                            <th>
+                                Author
+                            </th>
+                            <th>
+                                Title
+                            </th>
+                            <th>
+                                Status
+                            </th>
+                            <th>
+                                Type
+                            </th>
+                            <th>
+                                Priority
+                            </th>
+                            <th>
+                                Created
+                            </th>
+                            <th>
+                                Updated
+                            </th>
+                            <th>
+                                Developer Assigned
+                            </th>
+                            <th>
+                                Action
+                            </th>
+                        </tr>
+                    </tfoot>
+                </table>
+                </div>
+            <br />
+            <a href="@Url.Action("CreateTicketPartial", "Tickets", new { id = @ViewBag.projId })" data-toggle="modal" data-target="#create-ticket" class="btn btn-default pull-right"><i class="fa fa-plus"></i> New Ticket</a>
+            </div>
+        </div>
+</div>
+
+
+<!--Delete Modal-->
+<div class="modal fade" id="basic" tabindex="-1" role="alert" aria-hidden="true" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+                <h4 class="modal-title">Delete Confirmation</h4>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete this item?
+            </div>
+            <div class="modal-footer center">
+                <button data-dismiss="modal" type="button" class="btn btn-default">Cancel</button>
+                <button id="btnContinueDelete" type="button" class="btn btn-primary">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Create Ticket Modal-->
+<div class="modal fade" id="create-ticket" tabindex="-1" role="alert" aria-hidden="true" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content ticketbox">
+        </div>
+    </div>
+</div>
+
+<!--Edit Project Modal-->
+<div class="modal fade" id="edit-ticket" tabindex="-1" role="alert" aria-hidden="true" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content ticketbox">
+        </div>
+    </div>
+</div>
+
+@section CustomCSS{
+    <link rel="stylesheet" href="~/plugins/datatables/dataTables.bootstrap.css">
 }
 
-<h2>Index</h2>
+@section CustomJS{
+    <!-- DataTables -->
+    <script src="~/plugins/datatables/jquery.dataTables.min.js"></script>
+    <script src="~/plugins/datatables/dataTables.bootstrap.min.js"></script>
+    <!-- SlimScroll -->
+    <script src="~/plugins/slimScroll/jquery.slimscroll.min.js"></script>
+    <!-- FastClick -->
+    <script src="~/plugins/fastclick/fastclick.min.js"></script>
+    <script>
+        $(function () {
+            $('table.display').DataTable({
+                //"paging": true,
+                //"lengthChange": false,
+                //"searching": true,
+                //"ordering": true,
+                //"info": false,
+                //"autoWidth": false
+            });
 
-<p>
-    @Html.ActionLink("Create New", "Create", new { id = ViewBag.projId })
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                Project Name
-            </th>
-            <th>
-                Ticket Author
-            </th>
-            <th>
-                Ticket Title
-            </th>
-            <th>
-                Description
-            </th>
-            <th>
-                Status
-            </th>
-            <th>
-                Ticket Type
-            </th>
-            <th>
-                Priority
-            </th>
-            <th>
-                Created
-            </th>
-            <th>
-                Updated
-            </th>
-            <th>
-                User Assigned
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Project.Name)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Author.UserName)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Title)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Body)
-                </td>
-                <td>
-                    @item.Status.Name
-                </td>
-                <td>
-                    @item.TicketType.Type
-                </td>
-                <td>
-                    @item.Priority.Name
-                </td>
-                <td>
-                    @item.Created.ToString("d")
-                </td>
-                <td>
-                    @if (item.Updated.HasValue)
-                    {
-                        item.Updated.Value.ToString("d");
-                    }
-                </td>
-                <td>
-                    @if (item.AssignedUser != null)
-                    {
-                        @item.AssignedUser.UserName;
-                    }
-                </td>
-                <td>
-                    @Html.ActionLink("Edit", "Edit", new { id = item.Id }) |
-                    @Html.ActionLink("Details", "Details", new { id = item.Id }) |
-                    @Html.ActionLink("Delete", "Delete", new { id = item.Id })
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+            var ticketId;
+            $(".deleteTicket").click(function (e) {
+                ticketId = $(this).attr('id');
+            });
+
+            $('#btnContinueDelete').click(function () {
+                if (ticketId != null) {
+                    window.location = "/Tickets/Delete/" + ticketId;
+                }
+            });
+
+            $('.modal').on('hidden.bs.modal', function (e) {
+                $(this).removeData();
+            });
+        });
+    </script>
+}
