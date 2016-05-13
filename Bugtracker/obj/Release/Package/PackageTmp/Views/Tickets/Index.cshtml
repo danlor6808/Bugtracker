@@ -1,5 +1,6 @@
 ﻿@model IEnumerable<Bugtracker.Models.Ticket>
 @using Microsoft.AspNet.Identity;
+@using Bugtracker.Models;
 
 <div class="row">
     <div class="col-xs-12">
@@ -12,13 +13,10 @@
                     <thead>
                         <tr>
                             <th>
-                                Project Name
+                                Title
                             </th>
                             <th>
                                 Author
-                            </th>
-                            <th>
-                                Title
                             </th>
                             <th>
                                 Status
@@ -36,6 +34,12 @@
                                 Updated
                             </th>
                             <th>
+                                Updated-Hidden
+                            </th>
+                            <th>
+                                Project Manager
+                            </th>
+                            <th>
                                 Developer Assigned
                             </th>
                             <th>
@@ -48,14 +52,10 @@
                         {
                             <tr>
                                 <td>
-                                    @*<a href="@Url.Action("Details", "Projects", new { id = item.ProjectId})">@Html.DisplayFor(modelItem => item.Project.Name)</a>*@
-                                    @Html.DisplayFor(modelItem => item.Project.Name)
-                                </td>
-                                <td>
-                                    @Html.DisplayFor(modelItem => item.Author.UserName)
-                                </td>
-                                <td>
                                     @Html.DisplayFor(modelItem => item.Title)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.Author.DisplayName)
                                 </td>
                                 <td>
                                     <span class="label @item.Status.Name">@Html.DisplayFor(modelItem => item.Status.Name)</span>
@@ -72,6 +72,13 @@
                                 <td>
                                     @if (item.Updated.HasValue)
                                     {
+                                        var updated = TimeHelper.TimeAgo(item.Updated.Value);
+                                        @updated
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.Updated.HasValue)
+                                    {
                                         var updated = item.Updated.Value.ToString("d");
                                         @updated
                                     }
@@ -79,22 +86,27 @@
                                 <td>
                                     @if (item.AssignedUser != null)
                                     {
-                                        @item.AssignedUser.UserName;
+                                        @item.Project.ProjectManager.DisplayName;
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.AssignedUser != null)
+                                    {
+                                        @item.AssignedUser.DisplayName;
                                     }
                                 </td>
                                 <td>
 
                                     <ul class="list-inline">
-                                        @if (item.AuthorId == User.Identity.GetUserId() || User.IsInRole("Administrator") || User.IsInRole("Project Manager"))
+                                        @if (item.AuthorId == User.Identity.GetUserId() || item.Project.ProjectManagerId == User.Identity.GetUserId() || item.AssignedUserId == User.Identity.GetUserId() || User.IsInRole("Administrator"))
                                         {
-                                            if (User.IsInRole("Administrator") || User.IsInRole("Project Manager") && item.AuthorId == User.Identity.GetUserId() || item.Status.Name != "Complete")
+                                            if (User.IsInRole("Administrator") || item.StatusId != 3)
                                             {
-                                            <li><span data-toggle="tooltip" title="Edit"><a href="@Url.Action("Edit", "Tickets", new { id = item.Id })" data-toggle="modal" data-target="#edit-ticket"><i class="fa fa-pencil"></i></a></span></li>
+                                                <li><span data-toggle="tooltip" title="Edit"><a href="@Url.Action("Edit", "Tickets", new { id = item.Id })" data-toggle="modal" data-target="#edit-ticket"><i class="fa fa-pencil"></i></a></span></li>
                                             }
                                             if (User.Identity.IsAuthenticated && User.IsInRole("Administrator"))
                                             {
-                                            @*<li><a href="@Url.Action("Delete", "Tickets", new { id = item.Id })"><i class="fa fa-trash"></i> Delete</a></li>*@
-                                            <li><span data-toggle="tooltip" data-title="Delete"><a href="#deleteticket" data-toggle="modal" data-target="#basic" class="deleteTicket" id="@item.Id"><i class="fa fa-trash"></i></a></span></li>
+                                                <li><span data-toggle="tooltip" data-title="Delete"><a href="#deleteticket" data-toggle="modal" data-target="#basic" class="deleteTicket" id="@item.Id"><i class="fa fa-trash"></i></a></span></li>
                                             }
                                         }
                                         <li><a href="@Url.Action("Details", "Tickets", new { id = item.Id })" data-toggle="tooltip" title="View"><i class="fa fa-eye"></i></a></li>
@@ -106,9 +118,6 @@
                     </tbody>
                     <tfoot>
                         <tr>
-                            <th>
-                                Project Name
-                            </th>
                             <th>
                                 Author
                             </th>
@@ -129,6 +138,12 @@
                             </th>
                             <th>
                                 Updated
+                            </th>
+                            <th>
+                                Updated-Hidden
+                            </th>
+                            <th>
+                                Project Manager
                             </th>
                             <th>
                                 Developer Assigned
@@ -197,12 +212,16 @@
     <script>
         $(function () {
             $('table.display').DataTable({
-                //"paging": true,
-                //"lengthChange": false,
-                //"searching": true,
-                //"ordering": true,
-                //"info": false,
-                //"autoWidth": false
+                "aoColumnDefs":
+                    [{
+                            "targets": [7],
+                            "visible": false,
+                            "searchable": false
+                        },
+                        {
+                            "iDataSort": 6, "aTargets": [7]
+                        }],
+               "order": [[ 6, "desc" ]],
             });
 
             var ticketId;

@@ -25,6 +25,8 @@ namespace Bugtracker.Models
                 return string.Format("{0} hours ago", timeSince.Hours);
             if (timeSince.TotalDays == 1)
                 return "yesterday";
+            if (timeSince.TotalDays < 2)
+                return string.Format("{0} day ago", timeSince.Days);
             if (timeSince.TotalDays < 7)
                 return string.Format("{0} days ago", timeSince.Days);
             if (timeSince.TotalDays < 14)

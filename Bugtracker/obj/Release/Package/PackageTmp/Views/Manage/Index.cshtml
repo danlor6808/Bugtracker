@@ -1,6 +1,7 @@
 ﻿@model Bugtracker.Models.IndexViewModel
+@using Bugtracker.Models;
 
-
+<div class="row">
     <div class="col-lg-12">
         <div class="col-md-3">
             <!-- Profile Image -->
@@ -36,171 +37,166 @@
 
         <div class="col-md-9">
             <!-- Profile Image -->
-                <div class="nav-tabs-custom">
-                    <ul class="nav nav-tabs">
-                        <li class="active"><a href="#recent-tickets" data-toggle="tab">Recent Tickets</a></li>
-                        <li><a href="#timeline" data-toggle="tab">Timeline</a></li>
-                        <li><a href="#settings" data-toggle="tab">Settings</a></li>
-                    </ul>
-                
-        <div class="tab-content">
-            <div class="active tab-pane" id="recent-tickets">
-                <table class="display table table-responsive table-bordered table-condensed table-striped">
-                    <thead>
-                        <tr>
-                            <th>
-                                Ticket
-                            </th>
-                            <th>
-                                Created
-                            </th>
-                            <th>
-                                Status
-                            </th>
-                            <th>
-                                Developer
-                            </th>
-                            <th>
-                                Action
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var item in ViewBag.TicketList)
-                        {
-                            <tr>
-                                <td>
-                                    @item.Title
-                                </td>
-                                <td>
-                                    @item.Created.ToString("d")
-                                </td>
-                                <td>
-                                    <span class="label @item.Status.Name">@item.Status.Name</span>
-                                </td>
-                                <td>
-                                    @if (@item.AssignedUser != null)
-                                    {
-                                        @item.AssignedUser.UserName
-                                    }
-                                </td>
-                                <td>
-                                    <ul class="list-inline">
-                                        <li><a href="@Url.Action("Edit", "Tickets", new { id = item.Id })" data-toggle="tooltip" title="Edit"><i class="fa fa-pencil"></i></a></li>
-                                        <li><a href="@Url.Action("Details", "Tickets", new { id = item.Id })" data-toggle="tooltip" title="View"><i class="fa fa-eye"></i></a></li>
-                                    </ul>
-                                </td>
-                            </tr>
+            <div class="nav-tabs-custom">
+                <ul class="nav nav-tabs">
+                    <li class="active"><a href="#recent-tickets" data-toggle="tab">Recent Tickets</a></li>
+                    <li><a href="#timeline" data-toggle="tab">Change Log</a></li>
+                    <li><a href="#settings" data-toggle="tab">Settings</a></li>
+                </ul>
 
-                        }
-                    </tbody>
-                </table>
-            </div>
-            <div class="tab-pane" id="timeline">
-                </div>
-                <div class="tab-pane" id="settings">
-                    @*<form class="form-horizontal">
-                        <div class="form-group">
-                            <label for="inputName" class="col-sm-2 control-label">Name</label>
-                            <div class="col-sm-10">
-                                <input type="email" class="form-control" id="inputName" placeholder="Name">
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="inputEmail" class="col-sm-2 control-label">Email</label>
-                            <div class="col-sm-10">
-                                <input type="email" class="form-control" id="inputEmail" placeholder="Email">
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="inputName" class="col-sm-2 control-label">Name</label>
-                            <div class="col-sm-10">
-                                <input type="text" class="form-control" id="inputName" placeholder="Name">
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="inputExperience" class="col-sm-2 control-label">Experience</label>
-                            <div class="col-sm-10">
-                                <textarea class="form-control" id="inputExperience" placeholder="Experience"></textarea>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="inputSkills" class="col-sm-2 control-label">Skills</label>
-                            <div class="col-sm-10">
-                                <input type="text" class="form-control" id="inputSkills" placeholder="Skills">
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <div class="col-sm-offset-2 col-sm-10">
-                                <div class="checkbox">
-                                    <label>
-                                        <input type="checkbox"> I agree to the <a href="#">terms and conditions</a>
-                                    </label>
+                <div class="tab-content">
+                    <div class="active tab-pane" id="recent-tickets">
+                        <table class="display table table-responsive table-bordered table-condensed table-striped">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        Ticket
+                                    </th>
+                                    <th>
+                                        Created
+                                    </th>
+                                    <th>
+                                        Status
+                                    </th>
+                                    <th>
+                                        Developer
+                                    </th>
+                                    <th>
+                                        Action
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in ViewBag.TicketList)
+                                {
+                                    <tr>
+                                        <td>
+                                            @item.Title
+                                        </td>
+                                        <td>
+                                            @item.Created.ToString("d")
+                                        </td>
+                                        <td>
+                                            <span class="label @item.Status.Name">@item.Status.Name</span>
+                                        </td>
+                                        <td>
+                                            @if (@item.AssignedUser != null)
+                                            {
+                                                @item.AssignedUser.UserName
+                                            }
+                                        </td>
+                                        <td>
+                                            <ul class="list-inline">
+                                                <li><a href="@Url.Action("Edit", "Tickets", new { id = item.Id })" data-toggle="tooltip" title="Edit"><i class="fa fa-pencil"></i></a></li>
+                                                <li><a href="@Url.Action("Details", "Tickets", new { id = item.Id })" data-toggle="tooltip" title="View"><i class="fa fa-eye"></i></a></li>
+                                            </ul>
+                                        </td>
+                                    </tr>
+
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="tab-pane" id="timeline">
+                        <!-- The timeline -->
+                        <ul class="timeline timeline-inverse">
+                            @foreach (var item in Model.User.TicketHistory.Reverse())
+                            {
+                        <!-- timeline time label -->
+                                <li class="time-label">
+                                    <span class="bg-red">
+                                        @item.Created.ToString("d")
+                                    </span>
+                                </li>
+                        <!-- /.timeline-label -->
+                        <!-- timeline item -->
+                                <li>
+                                    @*<i class="fa fa-cogs bg-blue"></i>*@
+                                    <i class="fa"><img src="@item.User.ProfileIcon" class="img-circle" style="max-width: 35px" /></i>
+                                    <div class="timeline-item">
+                                        <span class="time"><i class="fa fa-clock-o"></i> @TimeHelper.TimeAgo(item.Created)</span>
+                                        <h3 class="timeline-header"><a href="@Url.Action("Details","Tickets", new { id = item.TicketId })">@item.Ticket.Title</a></h3>
+                                        <div class="timeline-body">
+                                            <ul>
+                                                @{
+                                                    string[] property = item.PropertyChanged.Split('.');
+                                                    var length = property.Length - 1;
+                                                    for (var n = 0; n < length; n++)
+                                                    {
+                                                        <li>@property[n]</li>
+                                                    }
+                                                }
+                                            </ul>
+                                        </div>
+                                        @*<div class="timeline-footer">
+                                                <a class="btn btn-primary btn-xs">Read more</a>
+                                                <a class="btn btn-danger btn-xs">Delete</a>
+                                            </div>*@
+                                    </div>
+                                </li>
+                        <!-- END timeline item -->
+                                                    }
+                            <li>
+                                <i class="fa fa-clock-o bg-black"></i>
+                            </li>
+                        </ul>
+                    </div> <!--#timeline-->
+                    <div class="tab-pane" id="settings">
+                        @using (Html.BeginForm("Index", "Manage", FormMethod.Post, new { @class = "form-horizontal", role = "form", enctype = "Multipart/form-data" }))
+                        {
+                            @Html.AntiForgeryToken()
+                            @Html.ValidationSummary("", new { @class = "text-danger" })
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.DisplayName, new { @class = "col-sm-2 control-label" })
+                                <div class="col-sm-10">
+                                    @Html.TextBoxFor(m => m.DisplayName, new { @class = "form-control" })
                                 </div>
                             </div>
-                        </div>
-                        <div class="form-group">
-                            <div class="col-sm-offset-2 col-sm-10">
-                                <button type="submit" class="btn btn-danger">Submit</button>
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.FirstName, new { @class = "col-sm-2 control-label" })
+                                <div class="col-sm-10">
+                                    @Html.TextBoxFor(m => m.FirstName, new { @class = "form-control" })
+                                </div>
                             </div>
-                        </div>
-                    </form>*@
-
-                    @using (Html.BeginForm("Index", "Manage", FormMethod.Post, new { @class = "form-horizontal", role = "form", enctype = "Multipart/form-data" }))
-                    {
-                        @Html.AntiForgeryToken()
-                        @Html.ValidationSummary("", new { @class = "text-danger" })
-                        <div class="form-group">
-                            @Html.LabelFor(m => m.DisplayName, new { @class = "col-sm-2 control-label" })
-                            <div class="col-sm-10">
-                                @Html.TextBoxFor(m => m.DisplayName, new { @class = "form-control" })
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.LastName, new { @class = "col-sm-2 control-label" })
+                                <div class="col-sm-10">
+                                    @Html.TextBoxFor(m => m.LastName, new { @class = "form-control" })
+                                </div>
                             </div>
-                        </div>
-                        <div class="form-group">
-                            @Html.LabelFor(m => m.FirstName, new { @class = "col-sm-2 control-label" })
-                            <div class="col-sm-10">
-                                @Html.TextBoxFor(m => m.FirstName, new { @class = "form-control" })
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.PhoneNumber, new { @class = "col-sm-2 control-label" })
+                                <div class="col-sm-10">
+                                    @Html.TextBoxFor(m => m.PhoneNumber, new { @class = "form-control", id = "phone" })
+                                </div>
                             </div>
-                        </div>
-                        <div class="form-group">
-                            @Html.LabelFor(m => m.LastName, new { @class = "col-sm-2 control-label" })
-                            <div class="col-sm-10">
-                                @Html.TextBoxFor(m => m.LastName, new { @class = "form-control" })
+                            <div class="form-group">
+                                <label class="control-label col-sm-2">Profile Icon</label>
+                                <div class="col-sm-10">
+                                    <input type="file" id="image" name="image" class="form-control" accept="image/*">
+                                    <small class="text-muted">For best results, please choose an image with dimension size 128 x 128</small>
+                                </div>
                             </div>
-                        </div>
-                        <div class="form-group">
-                            @Html.LabelFor(m => m.PhoneNumber, new { @class = "col-sm-2 control-label" })
-                            <div class="col-sm-10">
-                                @Html.TextBoxFor(m => m.PhoneNumber, new { @class = "form-control", id = "phone" })
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.Password, new { @class = "col-sm-2 control-label" })
+                                <div class="col-sm-10">
+                                    @*@Html.PasswordFor(m => m.Password, new { @class = "form-control" })*@
+                                    <input class="form-control" type="Password" name="Password" id="Password" placeholder="Confirm Password" required />
+                                    @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger" })
+                                </div>
                             </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="control-label col-sm-2">Profile Icon</label>
-                            <div class="col-sm-10">
-                                <input type="file" id ="image" name="image" class="form-control" accept="image/*">
-                                <small class="text-muted">For best results, please choose an image with dimension size 128 x 128</small>
+                            <div class="form-group">
+                                <div class="col-sm-offset-2 col-sm-10">
+                                    <input type="submit" value="Submit Changes" class="btn btn-danger" />
+                                </div>
                             </div>
-                        </div>
-                        <div class="form-group">
-                            @Html.LabelFor(m => m.Password, new { @class = "col-sm-2 control-label" })
-                            <div class="col-sm-10">
-                                @*@Html.PasswordFor(m => m.Password, new { @class = "form-control" })*@
-                                <input class="form-control" type="Password" name="Password" id="Password"  placeholder="Confirm Password" required />
-                                @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger" })
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <div class="col-sm-offset-2 col-sm-10">
-                                <input type="submit" value="Submit Changes" class="btn btn-danger" />
-                            </div>
-                        </div>
-                    }
-                </div><!-- /.tab-pane -->
+                        }
+                    </div><!-- /.tab-pane -->
+                </div>
             </div>
-            </div>
-            </div><!-- /.box -->
-        </div>
-
+        </div><!-- /.box -->
+    </div>
+</div>
 <!--Change Password Modal-->
 <div class="modal fade" id="change-pw" tabindex="-1" role="alert" aria-hidden="true" style="display: none;">
     <div class="modal-dialog">

@@ -57,8 +57,42 @@ namespace Bugtracker.Controllers
 
         //
         // GET: /Manage/Index
-        public async Task<ActionResult> Index(ManageMessageId? message)
+        public async Task<ActionResult> Index(ManageMessageId? message, string id)
         {
+            //if (id != "")
+            //{
+            //    var user = db.Users.First(u => u.DisplayName == id);
+            //    if (user != null)
+            //    {
+            //        var umodel = new IndexViewModel
+            //        {
+            //            User = user
+            //        };
+
+            //        //User Role List
+            //        var roleList = new List<string>();
+            //        foreach (var role in user.Roles)
+            //        {
+            //            var roleName = db.Roles.First(u => u.Id == role.RoleId);
+            //            roleList.Add(roleName.Name);
+            //        }
+            //        ViewBag.RoleList = roleList.ToList();
+
+            //        //Recently created tickets by user (top 5)
+            //        ViewBag.TicketList = db.Ticket.Where(u => u.AuthorId == user.Id).Take(5).OrderByDescending(d => d.Created).ToList();
+
+            //        //All tickets created by user
+            //        var uTicketList = db.Ticket.Where(u => u.AuthorId == user.Id).ToList();
+            //        ViewBag.UserTickets = uTicketList;
+            //        //Tickets with the status set as "complete" that belong to the user
+            //        ViewBag.CompletedTickets = uTicketList.Where(u => u.StatusId == 3).ToList();
+            //        ViewBag.layout = "sidebar-mini sidebar-collapse fixed";
+            //        ViewBag.Current = "Profile";
+            //        ViewBag.CurrentUser = User.Identity.GetUserId();
+            //        return View(umodel);
+            //    }
+            //}
+
             ViewBag.StatusMessage =
                 message == ManageMessageId.ChangePasswordSuccess ? "Your password has been changed."
                 : message == ManageMessageId.SetPasswordSuccess ? "Your password has been set."
@@ -257,48 +291,88 @@ namespace Bugtracker.Controllers
         //    return View(model);
         //}
 
-        [HttpPost, ActionName("Index")]
+        [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult ConfirmChanges(IndexViewModel model, HttpPostedFileBase image)
+        public async Task<ActionResult> Index(HttpPostedFileBase image, string type)
         {
-            if (!ModelState.IsValid)
+            if (type == "personal")
             {
-                return View(model);
-            }
-            var user = UserManager.FindById(User.Identity.GetUserId());
-            if (UserManager.CheckPassword(user, model.Password))
-            {
-                var path = Server.MapPath("~/upload/profileicon/"  + User.Identity.GetUserId() + "/");
-                Directory.CreateDirectory(path);
+                //if (!ModelState.IsValid)
+                //{
+                //    return View(model);
+                //}
 
-                if (ImageUploadValidator.IsWebFriendlyImage(image))
+                //manual value binding
+                var password = Request["Password"];
+                var displayname = Request["DisplayName"];
+                var firstname = Request["FirstName"];
+                var lastname = Request["LastName"];
+                var phonenumber = Request["PhoneNumber"];
+
+
+                var user = UserManager.FindById(User.Identity.GetUserId());
+                if (UserManager.CheckPassword(user, password))
                 {
-                    WebImage img = new WebImage(image.InputStream);
-                    if (img.Width != 128)
+                    var path = Server.MapPath("~/upload/profileicon/" + User.Identity.GetUserId() + "/");
+                    Directory.CreateDirectory(path);
+
+                    if (ImageUploadValidator.IsWebFriendlyImage(image))
                     {
-                        img.Resize(128, 128, false);
+                        WebImage img = new WebImage(image.InputStream);
+                        if (img.Width != 128)
+                        {
+                            img.Resize(128, 128, false);
+                        }
+
+                        var fileName = string.Format(Guid.NewGuid() + Path.GetExtension(image.FileName));
+                        //image.SaveAs(Path.Combine(path, fileName));
+                        var imgPath = Path.Combine(path, fileName);
+                        img.Save(imgPath);
+                        user.ProfileIcon = Path.Combine("/upload/profileicon/", User.Identity.GetUserId(), fileName);
                     }
 
-                    var fileName = string.Format(Guid.NewGuid() + Path.GetExtension(image.FileName));
-                    //image.SaveAs(Path.Combine(path, fileName));
-                    var imgPath = Path.Combine(path, fileName);
-                    img.Save(imgPath);
-                    user.ProfileIcon = Path.Combine("/upload/profileicon/", User.Identity.GetUserId(), fileName);
+                    user.DisplayName = displayname;
+                    user.FirstName = firstname;
+                    user.LastName = lastname;
+                    user.PhoneNumber = phonenumber;
+                    UserManager.Update(user);
                 }
+                else
+                {
+                    ViewBag.tColor = "danger";
+                    return RedirectToAction("Index", new { Message = ManageMessageId.IncorrectPassword });
+                }
+                ViewBag.tColor = "success";
+                return RedirectToAction("Index", new { Message = ManageMessageId.EditProfileSuccess });
+            }
+            else if (type == "password")
+            {
+                //if (!ModelState.IsValid)
+                //{
+                //    return RedirectToAction("Index", new { Message = ManageMessageId.IncorrectPassword });
+                //}
 
-                user.DisplayName = model.DisplayName;
-                user.FirstName = model.FirstName;
-                user.LastName = model.LastName;
-                user.PhoneNumber = model.PhoneNumber;
-                UserManager.Update(user);
+                //manual binding
+                var oldpassword = Request["OldPassword"];
+                var newpassword = Request["NewPassword"];
+
+                var result = await UserManager.ChangePasswordAsync(User.Identity.GetUserId(), oldpassword, newpassword);
+                if (result.Succeeded)
+                {
+                    var user = await UserManager.FindByIdAsync(User.Identity.GetUserId());
+                    if (user != null)
+                    {
+                        await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
+                    }
+                    return RedirectToAction("Index", new { Message = ManageMessageId.ChangePasswordSuccess });
+                }
+                AddErrors(result);
+                return RedirectToAction("Index", new { Message = ManageMessageId.IncorrectPassword });
             }
             else
             {
-                ViewBag.tColor = "danger";
-                return RedirectToAction("Index", new { Message = ManageMessageId.IncorrectPassword});
+                return HttpNotFound();
             }
-            ViewBag.tColor = "success";
-            return RedirectToAction("Index", new { Message = ManageMessageId.EditProfileSuccess });
         }
         //
         // GET: /Manage/ChangePassword
@@ -309,27 +383,27 @@ namespace Bugtracker.Controllers
 
         //
         // POST: /Manage/ChangePassword
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<ActionResult> ChangePassword(ChangePasswordViewModel model)
-        {
-            if (!ModelState.IsValid)
-            {
-                return View(model);
-            }
-            var result = await UserManager.ChangePasswordAsync(User.Identity.GetUserId(), model.OldPassword, model.NewPassword);
-            if (result.Succeeded)
-            {
-                var user = await UserManager.FindByIdAsync(User.Identity.GetUserId());
-                if (user != null)
-                {
-                    await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
-                }
-                return RedirectToAction("Index", new { Message = ManageMessageId.ChangePasswordSuccess });
-            }
-            AddErrors(result);
-            return View(model);
-        }
+        //[HttpPost, ActionName("Index")]
+        //[ValidateAntiForgeryToken]
+        //public async Task<ActionResult> ChangePassword(IndexViewModel model)
+        //{
+        //    if (!ModelState.IsValid)
+        //    {
+        //        return RedirectToAction("Index", new { Message = ManageMessageId.IncorrectPassword });
+        //    }
+        //    var result = await UserManager.ChangePasswordAsync(User.Identity.GetUserId(), model.OldPassword, model.NewPassword);
+        //    if (result.Succeeded)
+        //    {
+        //        var user = await UserManager.FindByIdAsync(User.Identity.GetUserId());
+        //        if (user != null)
+        //        {
+        //            await SignInManager.SignInAsync(user, isPersistent: false, rememberBrowser: false);
+        //        }
+        //        return RedirectToAction("Index", new { Message = ManageMessageId.ChangePasswordSuccess });
+        //    }
+        //    AddErrors(result);
+        //    return RedirectToAction("Index", new { Message = ManageMessageId.IncorrectPassword });
+        //}
 
         //
         // GET: /Manage/SetPassword

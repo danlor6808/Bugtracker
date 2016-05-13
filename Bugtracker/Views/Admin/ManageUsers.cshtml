@@ -24,6 +24,12 @@
                                 E-mail
                             </th>
                             <th>
+                                Projects Assigned
+                            </th>
+                            <th>
+                                Tickets Assigned
+                            </th>
+                            <th>
                                 User Roles
                             </th>
                             <th>
@@ -36,7 +42,7 @@
             {
                             <tr>
                                 <td>
-                                    @Html.DisplayFor(modelItem => item.user.DisplayName)
+                                    <a href="@Url.Action("Index","Manage", new { id=item.user.DisplayName})">@Html.DisplayFor(modelItem => item.user.DisplayName)</a>
                                 </td>
                                 <td>
                                     @Html.DisplayFor(modelItem => item.user.FirstName)
@@ -46,6 +52,28 @@
                                 </td>
                                 <td>
                                     @Html.DisplayFor(modelItem => item.user.Email)
+                                </td>
+                                <td>
+                                    @if (item.user.Projects.Where(u => u.ProjectManagerId == item.user.Id) != null)
+                                    {
+                                        var list = item.user.Projects.Where(u => u.ProjectManagerId == item.user.Id);
+                                        @list.Count()
+                                    }
+                                    else
+                                    {
+                                        @:0
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.user.Projects.Where(u => u.Tickets.All(t => t.AssignedUserId == item.user.Id)) != null)
+                                    {
+                                        var list = item.user.Projects.Where(u => u.Tickets.All(t => t.AssignedUserId == item.user.Id));
+                                        @list.Count()
+                                    }
+                                    else
+                                    {
+                                        @:0
+                                    }
                                 </td>
                                 <td>
                                     @foreach (var role in item.roles)
@@ -75,6 +103,12 @@
                             </th>
                             <th>
                                 E-mail
+                            </th>
+                            <th>
+                                Projects Assigned
+                            </th>
+                            <th>
+                                Tickets Assigned
                             </th>
                             <th>
                                 User Roles

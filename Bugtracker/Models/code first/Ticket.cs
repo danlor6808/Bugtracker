@@ -30,7 +30,6 @@ namespace Bugtracker.Models
         public virtual Project Project { get; set; }
 
         //public virtual ICollection<ApplicationUser> TicketUser { get; set; }
-        //public virtual ICollection<ApplicationUser> Users { get; set; }
 
         public virtual ICollection<TicketComments> Comments { get; set; }
         public virtual ICollection<Attachments> Attachments { get; set; }

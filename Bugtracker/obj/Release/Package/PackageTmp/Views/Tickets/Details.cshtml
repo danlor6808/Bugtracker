@@ -1,188 +1,222 @@
 ﻿@model Bugtracker.Models.Ticket
 @using Microsoft.AspNet.Identity;
+@using Bugtracker.Models;
 
 <div class="row">
-<div class="col-sm-6">
-    <div class="box box-solid">
-        <div class="box-header with-border">
-            <a href="@Url.Action("Index", "Tickets")"><i class="fa fa-chevron-left"></i></a>
-            <h3 class="box-title">Details</h3>
-            <div class="box-tools pull-right">
-                <i class="fa fa-pencil"></i>
-            </div>
-        </div>
-        <div class="box-body">
-            <dl class="dl-horizontal">
+    <div class="col-sm-6">
+        <div class="nav-tabs-custom">
+            <ul class="nav nav-tabs">
+                <li class="active"><a href="#details" data-toggle="tab">Details</a></li>
+                <li><a href="#timeline" data-toggle="tab">Change Log</a></li>
+            </ul>
+            <div class="tab-content">
+                <div class="active tab-pane" id="details">
+                    <div class="box-header with-border text-center">
+                        @*<a href="@Url.Action("Index", "Tickets")"><i class="fa fa-chevron-left"></i></a>*@
+                        <h6>@Html.DisplayFor(model => model.Project.Name)</h6>
+                        <h3 class="box-title">@Html.DisplayFor(model => model.Title)</h3>
+                    </div>
+                    <div class="box-body">
+                        <dl class="dl-horizontal">
+                            <dt>
+                                Description
+                            </dt>
 
-                <dt>
-                    Project Name
-                </dt>
+                            <dd>
+                                @Html.DisplayFor(model => model.Body)
+                            </dd>
 
-                <dd>
-                    @Html.DisplayFor(model => model.Project.Name)
-                </dd>
+                            <dt>
+                                Status
+                            </dt>
 
-                <dt>
-                    Ticket Title
-                </dt>
+                            <dd>
+                                @Html.DisplayFor(model => model.Status.Name)
+                            </dd>
 
-                <dd>
-                    @Html.DisplayFor(model => model.Title)
-                </dd>
+                            <dt>
+                                Type
+                            </dt>
 
-                <dt>
-                    Description
-                </dt>
+                            <dd>
+                                @Html.DisplayFor(model => model.TicketType.Type)
+                            </dd>
 
-                <dd>
-                    @Html.DisplayFor(model => model.Body)
-                </dd>
+                            <dt>
+                                Priority
+                            </dt>
 
-                <dt>
-                    Status
-                </dt>
+                            <dd>
+                                @Html.DisplayFor(model => model.Priority.Name)
+                            </dd>
 
-                <dd>
-                    @Html.DisplayFor(model => model.Status.Name)
-                </dd>
+                            <dt>
+                                @Html.DisplayNameFor(model => model.Created)
+                            </dt>
 
-                <dt>
-                    Type
-                </dt>
+                            <dd>
+                                @Model.Created.ToString("d")
+                            </dd>
 
-                <dd>
-                    @Html.DisplayFor(model => model.TicketType.Type)
-                </dd>
+                            <dt>
+                                @Html.DisplayNameFor(model => model.Updated)
+                            </dt>
 
-                <dt>
-                    Priority
-                </dt>
+                            <dd>
+                                @if (Model.Updated.HasValue)
+                                {
+                                    var updated = Model.Updated.Value.ToString("d");
+                                    @updated
+                                }
+                            </dd>
+                            <dt>
+                                Attachments
+                            </dt>
 
-                <dd>
-                    @Html.DisplayFor(model => model.Priority.Name)
-                </dd>
-
-                <dt>
-                    @Html.DisplayNameFor(model => model.Created)
-                </dt>
-
-                <dd>
-                    @Model.Created.ToString("d")
-                </dd>
-
-                <dt>
-                    @Html.DisplayNameFor(model => model.Updated)
-                </dt>
-
-                <dd>
-                    @if (Model.Updated.HasValue)
-            {
-                var updated = Model.Updated.Value.ToString("d");
-                        @updated
-                    }
-                </dd>
-                <dt>
-                    Attachments
-                </dt>
-
-                <dd>
-                    <ul class="list-unstyled">
-                        @if (Model.Attachments.Count != 0)
-                        {
-                            foreach (var attachment in Model.Attachments)
-                            {
-                                <li>
-                                    <a href="@attachment.FileURL">@attachment.Name</a>
-                                    <small>
-                                        - @attachment.User.UserName (@attachment.Uploaded.ToString("d"))
-                                        @if (attachment.UserId == User.Identity.GetUserId())
+                            <dd>
+                                <ul class="list-unstyled">
+                                    @if (Model.Attachments.Count != 0)
+                                    {
+                                        foreach (var attachment in Model.Attachments)
                                         {
-                                            @*@:[ <a href="@Url.Action("DeleteAttachment", "Tickets", new { id = attachment.Id, tId = Model.Id })">delete</a> ]*@
-                                            @: [ <a href="#" data-toggle="modal" data-target="#basic" class="deleteAttach" id="@attachment.Id">Delete</a> ]
+                                            <li>
+                                                <a href="@attachment.FileURL">@attachment.Name</a>
+                                                <small>
+                                                    - @attachment.User.UserName (@attachment.Uploaded.ToString("d"))
+                                                    @if (attachment.UserId == User.Identity.GetUserId())
+                                                    {
+                                                        @*@:[ <a href="@Url.Action("DeleteAttachment", "Tickets", new { id = attachment.Id, tId = Model.Id })">delete</a> ]*@
+                                                        @: [ <a href="#" data-toggle="modal" data-target="#basic" class="deleteAttach" id="@attachment.Id">Delete</a> ]
                             }
-                                    </small>
-                                </li>
-                            }
-                        }
-                        else
+                                                </small>
+                                            </li>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <li>No attachments have been uploaded.</li>
+                                    }
+                                </ul>
+                                @if (User.Identity.GetUserId() == Model.AuthorId || User.Identity.GetUserId() == Model.AssignedUserId || Model.Project.ProjectManagerId == User.Identity.GetUserId() || User.IsInRole("Administrator"))
+                                {
+                                    using (Html.BeginForm("Upload", "Tickets", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                                    {
+                                        <input type="file" class="btn btn-default" name="files" multiple />
+                                        <button class="btn btn-default" name="tId" value="@Model.Id">Upload</button>
+                                    }
+                                }
+                            </dd>
+                        </dl>
+                    </div> <!--box body-->
+                    <div class="box-footer">
+                        @if (User.Identity.IsAuthenticated && User.Identity.GetUserId() == Model.AuthorId || User.Identity.GetUserId() == Model.AssignedUserId || Model.Project.ProjectManagerId == User.Identity.GetUserId() || User.IsInRole("Administrator"))
                         {
-                            <li>No attachments have been uploaded.</li>
+                            using (Html.BeginForm("CreateComment", "Tickets", FormMethod.Post))
+                            {
+                                @Html.AntiForgeryToken()
+                                <div class="well">
+                                    <h4>Leave a Comment:</h4>
+                                    <div class="form-group">
+                                        <input type="hidden" name="TicketId" value="@Model.Id" />
+                                        <textarea class="form-control" required data-validation-required-message="Please enter your message" rows="3" name="Body"></textarea>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Submit</button>
+                                </div>
+                            }
                         }
+                    </div> <!--box footer-->
+                </div> <!--details tab-->
+                <div class="tab-pane" id="timeline">
+                    <!-- The timeline -->
+                    <ul class="timeline timeline-inverse">
+                        @foreach (var item in Model.TicketHistory.Reverse())
+                        {
+                        <!-- timeline time label -->
+                        <li class="time-label">
+                            <span class="bg-red">
+                                    @item.Created.ToString("d")
+                            </span>
+                        </li>
+                        <!-- /.timeline-label -->
+                        <!-- timeline item -->
+                        <li>
+                            @*<i class="fa fa-cogs bg-blue"></i>*@
+                            <i class="fa"><img src="@item.User.ProfileIcon" class="img-circle" style="max-width: 35px" /></i>
+                            <div class="timeline-item">
+                                <span class="time"><i class="fa fa-clock-o"></i> @TimeHelper.TimeAgo(item.Created)</span>
+                                <h3 class="timeline-header">@item.User.DisplayName</h3>
+                                <div class="timeline-body">
+                                    <ul>
+                                        @{
+                                            string[] property = item.PropertyChanged.Split('.');
+                                            var length = property.Length - 1;
+                                            for (var n = 0; n < length;n++)
+                                            {
+                                                <li>@property[n]</li>
+                                            }
+                                        }
+                                    </ul>
+                                </div>
+                                @*<div class="timeline-footer">
+                                    <a class="btn btn-primary btn-xs">Read more</a>
+                                    <a class="btn btn-danger btn-xs">Delete</a>
+                                </div>*@
+                            </div>
+                        </li>
+                        <!-- END timeline item -->
+                        }
+                        <li>
+                            <i class="fa fa-clock-o bg-black"></i>
+                        </li>
                     </ul>
-                    @if (User.Identity.IsAuthenticated && User.Identity.GetUserId() == Model.AuthorId || User.Identity.GetUserId() == Model.AssignedUserId || User.IsInRole("Administrator"))
-                    {
-                    using (Html.BeginForm("Upload", "Tickets", FormMethod.Post, new { enctype = "multipart/form-data" }))
-                    {
-                        <input type="file" class="btn btn-default" name="files" multiple />
-                        <button class="btn btn-default" name="tId" value="@Model.Id">Upload</button>
-                    }
-                    }
-                </dd>
-            </dl>
-        </div> <!--box body-->
-        <div class="box-footer">
-            @if (User.Identity.IsAuthenticated && User.Identity.GetUserId() == Model.AuthorId || User.Identity.GetUserId() == Model.AssignedUserId || User.IsInRole("Administrator"))
+                </div> <!--#timeline-->
+            </div> <!--tab content-->
+                </div> <!-- .custom-tabs -->
+            </div> <!-- Details/Timeline -->
+
+            <div class="col-sm-6" id="comments" style="padding:0">
+                @foreach (var comment in Model.Comments.Reverse())
             {
-                using (Html.BeginForm("CreateComment", "Tickets", FormMethod.Post))
-                {
-                    @Html.AntiForgeryToken()
-                    <div class="well">
-                        <h4>Leave a Comment:</h4>
-                        <div class="form-group">
-                            <input type="hidden" name="TicketId" value="@Model.Id" />
-                            <textarea class="form-control" required data-validation-required-message="Please enter your message" rows="3" name="Body"></textarea>
+                    <div class="box box-solid">
+                        <div class="box-header with-border">
+                            <h3 class="box-title">
+                                <i class="fa fa-commenting-o"></i> @Html.Raw(comment.Author.DisplayName)
+                            </h3>
+                            <small>
+                                on @Html.Raw(comment.Created.ToString("D")) - @TimeHelper.TimeAgo(comment.Created)
+                            </small>
+                            <div class="box-tools pull-right">
+                                @if (Request.IsAuthenticated && User.Identity.GetUserId() == comment.AuthorId)
+                                {
+                                    <a href="@Url.Action("EditComment", "Tickets", new { id = comment.Id })" data-toggle="modal" data-target="#edit-comment"><i class="fa fa-pencil"></i></a>
+                                }
+                                @if (Request.IsAuthenticated && (User.IsInRole("Administrator")))
+                                {
+                                    <a href="#" data-toggle="modal" data-target="#basic" class="deleteComment" id="@comment.Id" tId="@Model.Id"><i class="fa fa-trash"></i></a>
+                                }
+                            </div>
                         </div>
-                        <button type="submit" class="btn btn-primary">Submit</button>
+                        <div class="box-body">
+                            <div class="col-sm-12">
+                                <div class="col-sm-2">
+                                    <img class="img-circle media-object pull-left" src="@comment.Author.ProfileIcon" width="75" height="75" alt="">
+                                </div>
+                                <div class="col-sm-10">
+                                    @Html.Raw(comment.Body)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="box-footer">
+                            @if (comment.Updated != null)
+                            {
+                                <h6><em>Edited on @TimeHelper.TimeAgo(comment.Updated.Value)</em></h6>
+                            }
+                        </div>
+
                     </div>
                 }
-            }
-        </div> <!--box footer-->
-    </div> <!--box-->
-</div>
-
-<div class="col-sm-6" id="comments" style="padding:0">
-    @foreach (var comment in Model.Comments.Reverse())
-    {
-        <div class="box box-solid">
-            <div class="box-header with-border">
-                <h3 class="box-title">
-                    <i class="fa fa-commenting-o"></i> @Html.Raw(comment.Author.DisplayName)
-                </h3>
-                <small>
-                    on @Html.Raw(comment.Created.ToString("D"))
-                </small>
-                <div class="box-tools pull-right">
-                    @if (Request.IsAuthenticated && User.Identity.GetUserId() == comment.AuthorId)
-                    {
-                        <a href="@Url.Action("EditComment", "Tickets", new { id = comment.Id })" data-toggle="modal" data-target="#edit-comment"><i class="fa fa-pencil"></i></a>
-                    }
-                    @if (Request.IsAuthenticated && (User.IsInRole("Administrator")))
-                    {
-                        <a href="#" data-toggle="modal" data-target="#basic" class="deleteComment" id="@comment.Id" tId="@Model.Id"><i class="fa fa-trash"></i></a>
-                    }
-                </div>
-            </div>
-            <div class="box-body">
-                <div class="col-sm-12">
-                    <div class="col-sm-2">
-                        <img class="img-circle media-object pull-left" src="@comment.Author.ProfileIcon" width="75" height="75" alt="">
-                    </div>
-                    <div class="col-sm-10">
-                        @Html.Raw(comment.Body)
-                    </div>
-                </div>
-                </div>
-            <div class="box-footer">
-                @if (comment.Updated != null)
-                {
-                    <h6><em>Edited on @Html.Raw(comment.Updated.Value.ToString("D"))</em></h6>
-                }
-            </div>
-
-            </div>
-            }
-</div>
-    </div>
+            </div> <!-- .comments -->
+        </div> <!-- .row -->
 
 @*<p>
     @Html.ActionLink("Edit", "Edit", new { id = Model.Id }) |

@@ -65,7 +65,7 @@
                             <dd>
                                 @if (Model.Updated.HasValue)
                                 {
-                                    var updated = Model.Updated.Value.ToString("d");
+                                    var updated = TimeHelper.TimeAgo(Model.Updated.Value);
                                     @updated
                                 }
                             </dd>
@@ -85,9 +85,8 @@
                                                     - @attachment.User.UserName (@attachment.Uploaded.ToString("d"))
                                                     @if (attachment.UserId == User.Identity.GetUserId())
                                                     {
-                                                        @*@:[ <a href="@Url.Action("DeleteAttachment", "Tickets", new { id = attachment.Id, tId = Model.Id })">delete</a> ]*@
-                                                        @: [ <a href="#" data-toggle="modal" data-target="#basic" class="deleteAttach" id="@attachment.Id">Delete</a> ]
-                            }
+                                                        <a href="#" data-toggle="modal" data-target="#basic" class="deleteAttach" id="@attachment.Id"><i class="fa fa-trash"></i></a> 
+                                                    }
                                                 </small>
                                             </li>
                                         }

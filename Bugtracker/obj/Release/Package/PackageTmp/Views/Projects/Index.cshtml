@@ -1,5 +1,6 @@
 ﻿@model IEnumerable<Bugtracker.Models.Project>
 @using Microsoft.AspNet.Identity;
+@using Bugtracker.Models;
 
 @Html.AntiForgeryToken()
 
@@ -21,6 +22,9 @@
                             </th>
                             <th>
                                 @Html.DisplayNameFor(model => model.Updated)
+                            </th>
+                            <th>
+                                Updated-Hidden
                             </th>
                             <th>
                                 @Html.DisplayNameFor(model => model.Status)
@@ -54,8 +58,17 @@
                                     @{
                                         if (item.Updated.HasValue)
                                         {
-                                            var Updated = item.Updated.Value.ToString("d");
-                                            @Updated
+                                            var updated = TimeHelper.TimeAgo(item.Updated.Value);
+                                            @updated
+                                        }
+                                    }
+                                </td>
+                                <td>
+                                    @{
+                                        if (item.Updated.HasValue)
+                                        {
+                                            var updated = item.Updated.Value.ToString("d");
+                                            @updated
                                         }
                                     }
                                 </td>
@@ -69,7 +82,7 @@
                                     <a href="@Url.Action("Index","Tickets", new { id = @item.Id})">@item.Tickets.Count</a>
                                 </td>
                                 <td>
-                                    @Html.DisplayFor(modelItem => item.ProjectManager.UserName)
+                                    @Html.DisplayFor(modelItem => item.ProjectManager.DisplayName)
                                 </td>
                                 <td>
                                     <ul class="list-inline">
@@ -95,6 +108,9 @@
                             </th>
                             <th>
                                 @Html.DisplayNameFor(model => model.Updated)
+                            </th>
+                            <th>
+                                Updated-Hidden
                             </th>
                             <th>
                                 @Html.DisplayNameFor(model => model.Status)
@@ -181,6 +197,16 @@
     <script>
         $(function () {
             $('table.display').DataTable({
+                                "aoColumnDefs":
+                    [{
+                            "targets": [3],
+                            "visible": false,
+                            "searchable": false
+                        },
+                        {
+                            "iDataSort": 2, "aTargets": [3]
+                        }],
+               "order": [[ 2, "desc" ]],
             });
 
             var projectId;

@@ -16,7 +16,7 @@ namespace Bugtracker.Models
             if (User.Identity.IsAuthenticated)
             {
                 var user = db.Users.Find(User.Identity.GetUserId());
-
+                ViewBag.Notifications = user.Notifications.OrderByDescending(u => u.Created).ToList();
                 ViewBag.DisplayName = user.DisplayName;
                 ViewBag.ProfileIcon = user.ProfileIcon;
                 ViewBag.FirstName = user.FirstName;

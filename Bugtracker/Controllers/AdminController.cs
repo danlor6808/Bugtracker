@@ -37,6 +37,7 @@ namespace Bugtracker.Controllers
             }
             var CurrentUser = users.First(u => u.user.Id == User.Identity.GetUserId());
             users.Remove(CurrentUser);
+            ViewBag.TotalTickets = db.Ticket.ToList();
             return View(users);
         }
 
