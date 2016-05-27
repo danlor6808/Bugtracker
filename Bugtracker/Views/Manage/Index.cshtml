@@ -4,7 +4,7 @@
 
 <div class="row">
     <div class="col-lg-12">
-        <div class="col-md-3">
+        <div class="col-md-4">
             <!-- Profile Image -->
             <div class="box box-primary">
                 <div class="box-body box-profile">
@@ -16,25 +16,31 @@
                             @role <br />
                         }
                     </p>
-                    <ul class="list-group list-group-unbordered">
-                        <li class="list-group-item">
-                            <b>Tickets Created</b> <a class="pull-right" href="@Url.Action("Index","Tickets")">@ViewBag.UserTickets.Count</a>
-                        </li>
-                        <li class="list-group-item">
-                            <b>Completed Tickets</b> <a class="pull-right">@ViewBag.CompletedTickets.Count</a>
-                        </li>
-                    </ul>
+                <ul class="list-group list-group-unbordered">
+                    <li class="list-group-item">
+                        <b>Name</b>
+                        <a class="pull-right">@Model.User.FirstName @Model.User.LastName</a> 
+                    </li>
+                    <li class="list-group-item">
+                        <b>E-mail Address</b>
+                        <a class="pull-right">@Model.User.Email</a>
+                    </li>
+                    <li class="list-group-item">
+                        <b>Phone Number</b>
+                        <a class="pull-right">@Model.User.PhoneNumber</a>
+                    </li>
+                </ul>
                     <p class="text-@ViewBag.tColor text-center">@ViewBag.StatusMessage</p>
                 </div><!-- /.box-body -->
             </div><!-- /.box -->
         </div>
 
-        <div class="col-md-9">
+        <div class="col-md-8">
             <!-- Profile Image -->
             <div class="nav-tabs-custom">
                 <ul class="nav nav-tabs">
                     <li class="active"><a href="#recent-tickets" data-toggle="tab">Recent Tickets</a></li>
-                    <li><a href="#timeline" data-toggle="tab">Change Log</a></li>
+                    <li><a href="#timeline" data-toggle="tab">Recent Activity</a></li>
                     <li><a href="#settings" data-toggle="tab">Personal Settings</a></li>
                     <li><a href="#password" data-toggle="tab">Change Password</a></li>
                 </ul>
@@ -77,7 +83,7 @@
                                         <td>
                                             @if (@item.AssignedUser != null)
                                             {
-                                                @item.AssignedUser.UserName
+                                                @item.AssignedUser.DisplayName
                                             }
                                         </td>
                                         <td>
@@ -123,7 +129,7 @@
                                             </ul>
                                         </div>
                                         <div class="timeline-footer">
-                                                <a class="btn btn-primary btn-xs" href="@Url.Action("Details","Tickets", new { id = item.TicketId })">View Changes</a>
+                                                <a class="btn btn-primary btn-xs" href="@Url.Action("Details","Tickets", new { id = item.TicketId })">View</a>
                                         </div>
                                     </div>
                                 </li>

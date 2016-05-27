@@ -19,6 +19,8 @@ namespace Bugtracker.Models
     {
         public ApplicationUser user { get; set; }
         public List<string> roles { get; set; }
+        public int TotalTickets { get; set; }
+        public int TotalProjects { get; set; }
     }
 
     public class ProjUserViewModel

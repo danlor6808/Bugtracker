@@ -8,30 +8,32 @@
             <ul class="nav nav-tabs">
                 <li class="active"><a href="#details" data-toggle="tab">Details</a></li>
                 <li><a href="#timeline" data-toggle="tab">Change Log</a></li>
+                @if (User.IsInRole("Administrator") || (Model.StatusId != 3 && (User.Identity.GetUserId() == Model.AuthorId || User.Identity.GetUserId() == Model.AssignedUserId || User.Identity.GetUserId() == Model.Project.ProjectManagerId)))
+                {
+                <li><a href="#edit" data-toggle="tab">Edit Ticket Details</a></li>
+                }
             </ul>
             <div class="tab-content">
                 <div class="active tab-pane" id="details">
-                    <div class="box-header with-border text-center">
-                        @*<a href="@Url.Action("Index", "Tickets")"><i class="fa fa-chevron-left"></i></a>*@
-                        <h6>@Html.DisplayFor(model => model.Project.Name)</h6>
-                        <h3 class="box-title">@Html.DisplayFor(model => model.Title)</h3>
+                    <div class="pull-left">
+                        <a href="@Url.Action("Index", "Tickets")" data-toggle="tooltip" title="Back to ticket list"><i class="fa fa-list-ul"></i></a>
+                        @*<h6>@Html.DisplayFor(model => model.Project.Name)</h6>
+                        <h3 class="box-title">@Html.DisplayFor(model => model.Title)</h3>*@
                     </div>
                     <div class="box-body">
                         <dl class="dl-horizontal">
+                            <dt>
+                                Title
+                            </dt>
+                            <dd>
+                                @Html.DisplayFor(model => model.Title)
+                            </dd>
                             <dt>
                                 Description
                             </dt>
 
                             <dd>
                                 @Html.DisplayFor(model => model.Body)
-                            </dd>
-
-                            <dt>
-                                Status
-                            </dt>
-
-                            <dd>
-                                @Html.DisplayFor(model => model.Status.Name)
                             </dd>
 
                             <dt>
@@ -43,11 +45,19 @@
                             </dd>
 
                             <dt>
+                                Status
+                            </dt>
+
+                            <dd>
+                                <span class="label @Model.Status.Name">@Html.DisplayFor(model => model.Status.Name)</span>
+                            </dd>
+
+                            <dt>
                                 Priority
                             </dt>
 
                             <dd>
-                                @Html.DisplayFor(model => model.Priority.Name)
+                                <span class="label @Model.Priority.Name">@Html.DisplayFor(model => model.Priority.Name)</span>
                             </dd>
 
                             <dt>
@@ -65,9 +75,21 @@
                             <dd>
                                 @if (Model.Updated.HasValue)
                                 {
-                                    var updated = Model.Updated.Value.ToString("d");
+                                    var updated = TimeHelper.TimeAgo(Model.Updated.Value);
                                     @updated
                                 }
+                            </dd>
+                            <dt>
+                                Assigned Developer
+                            </dt>
+                            <dd>
+                                @Html.DisplayFor(model => model.AssignedUser.DisplayName)
+                            </dd>
+                            <dt>
+                                Project Manager
+                            </dt>
+                            <dd>
+                                @Html.DisplayFor(model => model.Project.ProjectManager.DisplayName)
                             </dd>
                             <dt>
                                 Attachments
@@ -85,9 +107,8 @@
                                                     - @attachment.User.UserName (@attachment.Uploaded.ToString("d"))
                                                     @if (attachment.UserId == User.Identity.GetUserId())
                                                     {
-                                                        @*@:[ <a href="@Url.Action("DeleteAttachment", "Tickets", new { id = attachment.Id, tId = Model.Id })">delete</a> ]*@
-                                                        @: [ <a href="#" data-toggle="modal" data-target="#basic" class="deleteAttach" id="@attachment.Id">Delete</a> ]
-                            }
+                                                        <a href="#" data-toggle="modal" data-target="#basic" class="deleteAttach" id="@attachment.Id"><i class="fa fa-trash"></i></a> 
+                                                    }
                                                 </small>
                                             </li>
                                         }
@@ -97,10 +118,10 @@
                                         <li>No attachments have been uploaded.</li>
                                     }
                                 </ul>
-                                @if (User.Identity.GetUserId() == Model.AuthorId || User.Identity.GetUserId() == Model.AssignedUserId || Model.Project.ProjectManagerId == User.Identity.GetUserId() || User.IsInRole("Administrator"))
-                                {
-                                    using (Html.BeginForm("Upload", "Tickets", FormMethod.Post, new { enctype = "multipart/form-data" }))
-                                    {
+                              @if (User.IsInRole("Administrator") || (Model.StatusId != 3 && (User.Identity.GetUserId() == Model.AuthorId || User.Identity.GetUserId() == Model.AssignedUserId || User.Identity.GetUserId() == Model.Project.ProjectManagerId)))
+                              {
+                                  using (Html.BeginForm("Upload", "Tickets", FormMethod.Post, new { enctype = "multipart/form-data" }))
+                                  {
                                         <input type="file" class="btn btn-default" name="files" multiple />
                                         <button class="btn btn-default" name="tId" value="@Model.Id">Upload</button>
                                     }
@@ -109,10 +130,10 @@
                         </dl>
                     </div> <!--box body-->
                     <div class="box-footer">
-                        @if (User.Identity.IsAuthenticated && User.Identity.GetUserId() == Model.AuthorId || User.Identity.GetUserId() == Model.AssignedUserId || Model.Project.ProjectManagerId == User.Identity.GetUserId() || User.IsInRole("Administrator"))
-                        {
-                            using (Html.BeginForm("CreateComment", "Tickets", FormMethod.Post))
-                            {
+                      @if (User.IsInRole("Administrator") || (Model.StatusId != 3 && (User.Identity.GetUserId() == Model.AuthorId || User.Identity.GetUserId() == Model.AssignedUserId || User.Identity.GetUserId() == Model.Project.ProjectManagerId)))
+                      {
+                          using (Html.BeginForm("CreateComment", "Tickets", FormMethod.Post))
+                          {
                                 @Html.AntiForgeryToken()
                                 <div class="well">
                                     <h4>Leave a Comment:</h4>
@@ -170,17 +191,153 @@
                         </li>
                     </ul>
                 </div> <!--#timeline-->
+            <!--EDIT TICKET SECTION-->
+               @if (User.IsInRole("Administrator") || (Model.StatusId != 3 && (User.Identity.GetUserId() == Model.AuthorId || User.Identity.GetUserId() == Model.AssignedUserId || User.Identity.GetUserId() == Model.Project.ProjectManagerId)))
+               {
+                <div class="tab-pane" id="edit">
+
+                    @using (Html.BeginForm("Edit", "Tickets", FormMethod.Post))
+                    {
+                        @Html.AntiForgeryToken()
+                        <div class="form-horizontal">
+                            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                            @Html.HiddenFor(model => model.Id)
+
+                            @if (Model.AuthorId == User.Identity.GetUserId() || User.IsInRole("Administrator"))
+                            {
+                                <div class="form-group">
+                                    @Html.LabelFor(model => model.Title, htmlAttributes: new { @class = "control-label col-md-2" })
+                                    <div class="col-md-10">
+                                        @Html.EditorFor(model => model.Title, new { htmlAttributes = new { @class = "form-control" } })
+                                        @Html.ValidationMessageFor(model => model.Title, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="control-label col-md-2" for="Body">Description</label>
+                                    <div class="col-md-10">
+                                        @Html.EditorFor(model => model.Body, new { htmlAttributes = new { @class = "form-control" } })
+                                        @Html.ValidationMessageFor(model => model.Body, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+
+                                <div class="form-group">
+                                    @Html.LabelFor(model => model.Title, htmlAttributes: new { @class = "control-label col-md-2" })
+                                    <div class="col-md-10">
+                                        @Html.DisplayFor(model => model.Title, new { htmlAttributes = new { @class = "form-control" } })
+                                        @Html.ValidationMessageFor(model => model.Title, "", new { @class = "text-danger" })
+                                        @Html.HiddenFor(model => model.Title)
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="control-label col-md-2" for="Body">Description</label>
+                                    <div class="col-md-10">
+                                        @Html.DisplayFor(model => model.Body, new { htmlAttributes = new { @class = "form-control" } })
+                                        @Html.ValidationMessageFor(model => model.Body, "", new { @class = "text-danger" })
+                                        @Html.HiddenFor(model => model.Body)
+                                    </div>
+                                </div>
+                            }
+
+                            @if (User.IsInRole("Developer") || User.IsInRole("Administrator"))
+                            {
+                                <div class="form-group">
+                                    <label class="control-label col-md-2" for="StatusId">Status</label>
+                                    <div class="col-md-10">
+                                        @Html.DropDownList("StatusId", ViewBag.TicketStatus as SelectList, htmlAttributes: new { @class = "form-control" })
+                                        @Html.ValidationMessageFor(model => model.StatusId, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                @Html.HiddenFor(model => model.StatusId)
+                            }
+
+                            <div class="form-group">
+                                <label class="control-label col-md-2" for="TicketTypeId">Ticket Type</label>
+                                <div class="col-md-10">
+                                    @Html.DropDownList("TicketTypeId", ViewBag.TicketType as SelectList, htmlAttributes: new { @class = "form-control" })
+                                    @Html.ValidationMessageFor(model => model.TicketTypeId, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="control-label col-md-2" for="PriorityId">Priority</label>
+                                <div class="col-md-10">
+                                    @Html.DropDownList("PriorityId", ViewBag.TicketPriority as SelectList, htmlAttributes: new { @class = "form-control" })
+                                    @Html.ValidationMessageFor(model => model.PriorityId, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+
+                            @if (User.IsInRole("Project Manager"))
+                            {
+                                <div class="form-group">
+                                    <label class="control-label col-md-2" for="AssignedUserId">Developer</label>
+                                    <div class="col-md-10">
+                                        @Html.DropDownList("AssignedUserId", ViewBag.AssignedUser as SelectList, htmlAttributes: new { @class = "form-control" })
+                                        @Html.ValidationMessageFor(model => model.AssignedUserId, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="form-group">
+                                    <label class="control-label col-md-2" for="AssignedUserId">Developer</label>
+                                    <div class="col-md-10">
+                                        @if (Model.AssignedUserId != null)
+                                        {
+                                            <label>@Model.AssignedUser.UserName</label>
+                                            @Html.HiddenFor(model => model.AssignedUserId)
+                                        }
+                                        else
+                                        {
+                                            <label>Not Yet Assigned</label>
+                                            @Html.HiddenFor(model => model.AssignedUserId)
+                                        }
+                                    </div>
+                                </div>
+                            }
+
+                            @if (User.IsInRole("Administrator"))
+                            {
+                                <div class="form-group">
+                                    <label class="control-label col-md-2" for="ProjectId">Project</label>
+                                    <div class="col-md-10">
+                                        @Html.DropDownList("ProjectId", ViewBag.ProjectList as SelectList, htmlAttributes: new { @class = "form-control" })
+                                        @Html.ValidationMessageFor(model => model.ProjectId, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                @Html.HiddenFor(model => model.ProjectId)
+                            }
+
+                            <div class="form-group">
+                                <div class="col-md-offset-2 col-md-10">
+                                    <button type="submit" name="Id" value="editdetails" class="btn btn-primary">Save Changes</button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+                }
             </div> <!--tab content-->
-                </div> <!-- .custom-tabs -->
-            </div> <!-- Details/Timeline -->
+        </div> <!-- .custom-tabs -->
+    </div> <!-- Details/Timeline -->
 
             <div class="col-sm-6" id="comments" style="padding:0">
                 @foreach (var comment in Model.Comments.Reverse())
-            {
+                {
                     <div class="box box-solid">
                         <div class="box-header with-border">
                             <h3 class="box-title">
-                                <i class="fa fa-commenting-o"></i> @Html.Raw(comment.Author.DisplayName)
+                                @Html.Raw(comment.Author.DisplayName) <i class="fa fa-commenting-o"></i> 
                             </h3>
                             <small>
                                 on @Html.Raw(comment.Created.ToString("D")) - @TimeHelper.TimeAgo(comment.Created)
@@ -199,7 +356,7 @@
                         <div class="box-body">
                             <div class="col-sm-12">
                                 <div class="col-sm-2">
-                                    <img class="img-circle media-object pull-left" src="@comment.Author.ProfileIcon" width="75" height="75" alt="">
+                                    <img class="img-square media-object pull-left" src="@comment.Author.ProfileIcon" width="75" height="75" alt="">
                                 </div>
                                 <div class="col-sm-10">
                                     @Html.Raw(comment.Body)

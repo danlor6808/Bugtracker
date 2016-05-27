@@ -30,7 +30,7 @@
         <div class="form-group">
             <label class="control-label col-md-2" for="users">Project Manager</label>
             <div class="col-md-10">
-                @Html.DropDownList("UserSelected", new SelectList(ViewBag.userList, "Id", "UserName", ViewBag.selectList), new { @class = "form-control", Title = "Choose user to assign" })
+                @Html.DropDownList("UserSelected", new SelectList(ViewBag.userList, "Id", "DisplayName", ViewBag.selectList), new { @class = "form-control", Title = "Choose user to assign" })
                 @Html.ValidationMessageFor(model => model.ProjectManager, "", new { @class = "text-danger" })
             </div>
         </div>

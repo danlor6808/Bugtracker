@@ -371,6 +371,9 @@
     <Content Include="dist\img\avatar5.png" />
     <Content Include="dist\img\boxed-bg.jpg" />
     <Content Include="dist\img\boxed-bg.png" />
+    <Content Include="dist\img\city-night-01.jpg" />
+    <Content Include="dist\img\city-night.jpg" />
+    <Content Include="dist\img\city-night.png" />
     <Content Include="dist\img\credit\american-express.png" />
     <Content Include="dist\img\credit\cirrus.png" />
     <Content Include="dist\img\credit\mastercard.png" />
@@ -378,8 +381,15 @@
     <Content Include="dist\img\credit\paypal.png" />
     <Content Include="dist\img\credit\paypal2.png" />
     <Content Include="dist\img\credit\visa.png" />
+    <Content Include="dist\img\dark_wall.png" />
     <Content Include="dist\img\default-50x50.gif" />
     <Content Include="dist\img\icons.png" />
+    <Content Include="dist\img\icon_admin.jpg" />
+    <Content Include="dist\img\icon_developer.jpg" />
+    <Content Include="dist\img\icon_footer.jpg" />
+    <Content Include="dist\img\icon_projectmanager.jpg" />
+    <Content Include="dist\img\icon_submitter.jpg" />
+    <Content Include="dist\img\lil_fiber.png" />
     <Content Include="dist\img\photo1.png" />
     <Content Include="dist\img\photo2.png" />
     <Content Include="dist\img\photo3.jpg" />
@@ -866,6 +876,7 @@
     <Content Include="plugins\datatables\jquery.dataTables.min.css" />
     <Content Include="plugins\datatables\jquery.dataTables.min.js" />
     <Content Include="plugins\datatables\jquery.dataTables_themeroller.css" />
+    <Content Include="plugins\datatables\moment.js" />
     <Content Include="plugins\datepicker\bootstrap-datepicker.js" />
     <Content Include="plugins\datepicker\datepicker3.css" />
     <Content Include="plugins\datepicker\locales\bootstrap-datepicker.ar.js" />
@@ -1300,6 +1311,7 @@
     <Content Include="plugins\uploadify\check-exists.php" />
     <Content Include="plugins\uploadify\index.php" />
     <Content Include="plugins\uploadify\uploadify.php" />
+    <Content Include="default.svg" />
     <None Include="Properties\PublishProfiles\dlorn-bugtracker.pubxml" />
     <Content Include="README.md" />
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />
@@ -1415,6 +1427,13 @@
     <Content Include="upload\ANNOYED\3\20160504.png" />
     <Content Include="upload\ANNOYED\3\3985365c-7d44-4f5f-99aa-25b2e3eee187.txt" />
     <Content Include="upload\ANNOYED\3\face.jpg" />
+    <Content Include="upload\badges\icon_.net.png" />
+    <Content Include="upload\badges\icon_css3.png" />
+    <Content Include="upload\badges\icon_html5-JS-CSS3.png" />
+    <Content Include="upload\badges\icon_html5.png" />
+    <Content Include="upload\badges\icon_Sql.png" />
+    <Content Include="upload\badges\icon_visualstudio.png" />
+    <Content Include="upload\badges\logo_aspmvc345.png" />
     <Content Include="upload\Creating a new project\26\100x100.png" />
     <Content Include="upload\profileicon\a76333e0-24c3-4f9c-a2f9-0b9a40af8038\.png" />
     <Content Include="upload\profileicon\a76333e0-24c3-4f9c-a2f9-0b9a40af8038\1433659d-8818-497f-9179-6ede6278b9ea.png" />
@@ -1506,6 +1525,7 @@
     <Content Include="upload\Project Deliverable\17\1 - C#.pptx" />
     <Content Include="upload\Project Deliverable\17\1 - Relational Databases.pptx" />
     <Content Include="upload\Project Deliverable\17\2 - Data Modeling.pptx" />
+    <Content Include="upload\default.svg" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

@@ -97,6 +97,25 @@ namespace Bugtracker.Controllers
             {
                 return HttpNotFound();
             }
+            var user = User.Identity.GetUserId();
+            //Checks whether current user is an administrator, a user that was assigned to the ticket, or the ticket author
+            if (User.IsInRole("Administrator") || ticket.Project.ProjectManagerId == user || ticket.AssignedUserId == user || ticket.AuthorId == user)
+            {
+                //Checks if status is not closed
+                if (ticket.StatusId != 3 || User.IsInRole("Administrator"))
+                {
+                    var role = db.Roles.First(u => u.Name == "Developer");
+                    //var developers = ticket.Project.User.Where(u => u.Roles.Any(r => r.RoleId == role.Id));
+                    var developers = db.Users.Where(u => u.Roles.Any(r => r.RoleId == role.Id));
+                    ViewBag.AssignedUser = new SelectList(developers, "Id", "DisplayName", ticket.AssignedUserId);
+                    ViewBag.TicketStatus = new SelectList(db.TicketStatus, "Id", "Name", ticket.StatusId);
+                    ViewBag.TicketType = new SelectList(db.TicketType, "Id", "Type", ticket.TicketTypeId);
+                    ViewBag.TicketPriority = new SelectList(db.TicketPriority, "Id", "Name", ticket.PriorityId);
+                    var openProject = db.Project.Where(u => u.Status != "Closed");
+                    ViewBag.ProjectList = new SelectList(openProject, "Id", "Name", ticket.ProjectId);
+                    return View(ticket);
+                }
+            }
             return View(ticket);
         }
 
@@ -111,7 +130,8 @@ namespace Bugtracker.Controllers
                 Ticket ticket = new Ticket();
                 ViewBag.TicketType = new SelectList(db.TicketType, "Id", "Type");
                 ViewBag.TicketPriority = new SelectList(db.TicketPriority, "Id", "Name");
-                ViewBag.ProjectList = new SelectList(db.Project, "Id", "Name");
+                var openProject = db.Project.Where(u => u.Status != "Closed");
+                ViewBag.ProjectList = new SelectList(openProject, "Id", "Name");
                 ViewBag.Bool = true;
                 return View(ticket);
             }
@@ -199,7 +219,8 @@ namespace Bugtracker.Controllers
                     ViewBag.TicketStatus = new SelectList(db.TicketStatus, "Id", "Name", ticket.StatusId);
                     ViewBag.TicketType = new SelectList(db.TicketType, "Id", "Type", ticket.TicketTypeId);
                     ViewBag.TicketPriority = new SelectList(db.TicketPriority, "Id", "Name", ticket.PriorityId);
-                    ViewBag.ProjectList = new SelectList(db.Project, "Id", "Name", ticket.ProjectId);
+                    var openProject = db.Project.Where(u => u.Status != "Closed");
+                    ViewBag.ProjectList = new SelectList(openProject, "Id", "Name", ticket.ProjectId);
                     return View(ticket);
                 }
             }
@@ -211,7 +232,7 @@ namespace Bugtracker.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Edit([Bind(Include = "Id,ProjectId,Title,Body,StatusId,TicketTypeId,PriorityId,AssignedUserId")] Ticket ticket)
+        public async Task<ActionResult> Edit([Bind(Include = "Id,ProjectId,Title,Body,StatusId,TicketTypeId,PriorityId,AssignedUserId")] Ticket ticket, string id)
         {
             if (ModelState.IsValid)
             {
@@ -227,7 +248,7 @@ namespace Bugtracker.Controllers
                 var role = db.Roles.First(u => u.Name == "Developer");
                 var developers = db.Users.Where(u => u.Roles.Any(r => r.RoleId == role.Id));
 
-                if (User.IsInRole("Developer"))
+                if (User.IsInRole("Developer") || User.IsInRole("Administrator"))
                 {
                     db.Entry(ticket).Property("StatusId").IsModified = true;
                 }
@@ -242,14 +263,19 @@ namespace Bugtracker.Controllers
                     db.Entry(ticket).Property("ProjectId").IsModified = true;
                 }
 
-                    if (String.IsNullOrWhiteSpace(ticket.Title))
+                if (String.IsNullOrWhiteSpace(ticket.Title))
                 {
                     ModelState.AddModelError("Title", "Please enter a valid title.");
                     ViewBag.AssignedUser = new SelectList(developers, "Id", "DisplayName");
                     ViewBag.TicketStatus = new SelectList(db.TicketStatus, "Id", "Name", ticket.StatusId);
                     ViewBag.TicketType = new SelectList(db.TicketType, "Id", "Type", ticket.TicketTypeId);
                     ViewBag.TicketPriority = new SelectList(db.TicketPriority, "Id", "Name", ticket.PriorityId);
-                    ViewBag.ProjectList = new SelectList(db.Project, "Id", "Name", ticket.ProjectId);
+                    var openProject = db.Project.Where(u => u.Status != "Closed");
+                    ViewBag.ProjectList = new SelectList(openProject, "Id", "Name", ticket.ProjectId);
+                    if (id == "editdetails")
+                    {
+                        return View("Details", ticket);
+                    }
                     return View(ticket);
                 }
 
@@ -263,8 +289,12 @@ namespace Bugtracker.Controllers
                         ViewBag.TicketStatus = new SelectList(db.TicketStatus, "Id", "Name", ticket.StatusId);
                         ViewBag.TicketType = new SelectList(db.TicketType, "Id", "Type", ticket.TicketTypeId);
                         ViewBag.TicketPriority = new SelectList(db.TicketPriority, "Id", "Name", ticket.PriorityId);
-                        ViewBag.ProjectList = new SelectList(db.Project, "Id", "Name", ticket.ProjectId);
-
+                        var openProject = db.Project.Where(u => u.Status != "Closed");
+                        ViewBag.ProjectList = new SelectList(openProject, "Id", "Name", ticket.ProjectId);
+                        if (id == "editdetails")
+                        {
+                            return View("Details", ticket);
+                        }
                         return View(ticket);
                     }
                 }
@@ -321,6 +351,7 @@ namespace Bugtracker.Controllers
                 }
 
                 //OLD vs NEW COMPARISONS
+                var user = db.Users.Find(User.Identity.GetUserId());
                 var ChangeList = new List<string>();
                 bool tAssignment = false;
 
@@ -344,11 +375,29 @@ namespace Bugtracker.Controllers
                 };
                 if (oldticket?.Title != ticket.Title) { var change = string.Format("Title has been changed from \"{0}\" to \"{1}\".", oldticket.Title, ticket.Title); ChangeList.Add(change); };
                 if (oldticket?.Body != ticket.Body) { var change = "Description has been changed."; ChangeList.Add(change); }
-                if (oldticket?.StatusId != ticket.StatusId) { var change = string.Format("Status has been changed from \"{0}\" to \"{1}\".", oldticket.Status.Name, ViewBag.Status); ChangeList.Add(change); };
+                if (oldticket?.StatusId != ticket.StatusId) {
+                    var change = string.Format("Status has been changed from \"{0}\" to \"{1}\".", oldticket.Status.Name, ViewBag.Status);
+                    ChangeList.Add(change);
+                    
+                        if (user.Id != oldticket.Project.ProjectManagerId)
+                        {
+                            if (ticket.StatusId == 3)
+                            {
+                                Notifications notification3 = new Notifications
+                                {
+                                    TicketId = ticket.Id,
+                                    UserId = oldticket.Project.ProjectManagerId,
+                                    TypeId = 5,
+                                    AuthorProfile = user.ProfileIcon,
+                                    Created = DateTimeOffset.Now,
+                                    Description = string.Format("Has been resolved")
+                                };
+                            db.Notification.Add(notification3);
+                            }
+                        }
+                };
                 if (oldticket?.TicketTypeId != ticket.TicketTypeId) { var change = string.Format("Type has been changed from \"{0}\" to \"{1}\".", oldticket.TicketType.Type, ViewBag.TicketType); ChangeList.Add(change); };
                 if (oldticket?.PriorityId != ticket.PriorityId) { var change = string.Format("Priority has been changed from \"{0}\" to \"{1}\".", oldticket.Priority.Name, ViewBag.Priority); ChangeList.Add(change); };
-
-
                 //checks if a new person has been assigned to the ticket--if true--sends an email to notify them of the change
                 if (tAssignment)
                 {
@@ -359,7 +408,7 @@ namespace Bugtracker.Controllers
                     sb.Append("Please click <a href=\"" + callBackUrl + "\">here</a> to view details");
                     //Sending email to Assigned User
                     await UserManager.SendEmailAsync(ticket.AssignedUserId, string.Format("Ticket Assignment: {0}", ticket.Title), sb.ToString());
-                    var user = db.Users.Find(User.Identity.GetUserId());
+
                     Notifications notification = new Notifications
                     {
                         TicketId = ticket.Id,
@@ -384,34 +433,36 @@ namespace Bugtracker.Controllers
                         PropertyChanged = string.Concat(ChangeList.ToArray())
                     };
 
-                    //Send email of changes if the person who made the changes IS NOT assigned to the ticket
-                    if (User.Identity.GetUserId() != ticket.AssignedUserId)
+                    if (ticket.AssignedUserId != null)
                     {
-                        //Creating email Body
-                        StringBuilder sb = new StringBuilder();
-                        var callBackUrl = Url.Action("Details", "Tickets", new { id = ticket.Id }, protocol: Request.Url.Scheme);
-                        sb.Append("Changes have been made to the ticket: <b>" + ticket.Title + "</b><br>");
-                        sb.Append("<ul>");
-                        foreach (var change in ChangeList)
+                        //Send email of changes if the person who made the changes IS NOT assigned to the ticket
+                        if (User.Identity.GetUserId() != ticket.AssignedUserId)
                         {
-                            sb.AppendFormat("<li><em>{0}</em></li>", change);
-                        };
-                        sb.Append("</ul>");
-                        sb.Append("Please click <a href=\"" + callBackUrl + "\">here</a> to view details");
-                        //Sending email to Assigned User
-                        await UserManager.SendEmailAsync(ticket.AssignedUserId, string.Format("Ticket Updated: {0}", ticket.Title), sb.ToString());
-                        var user = db.Users.Find(User.Identity.GetUserId());
+                            //Creating email Body
+                            StringBuilder sb = new StringBuilder();
+                            var callBackUrl = Url.Action("Details", "Tickets", new { id = ticket.Id }, protocol: Request.Url.Scheme);
+                            sb.Append("Changes have been made to the ticket: <b>" + ticket.Title + "</b><br>");
+                            sb.Append("<ul>");
+                            foreach (var change in ChangeList)
+                            {
+                                sb.AppendFormat("<li><em>{0}</em></li>", change);
+                            };
+                            sb.Append("</ul>");
+                            sb.Append("Please click <a href=\"" + callBackUrl + "\">here</a> to view details");
+                            //Sending email to Assigned User
+                            await UserManager.SendEmailAsync(ticket.AssignedUserId, string.Format("Ticket Updated: {0}", ticket.Title), sb.ToString());
 
-                        Notifications notification2 = new Notifications
-                        {
-                            TicketId = ticket.Id,
-                            UserId = ticket.AssignedUserId,
-                            TypeId = 2,
-                            AuthorProfile = user.ProfileIcon,
-                            Created = DateTimeOffset.Now,
-                            Description = string.Format("Has been modified")
-                        };
-                        db.Notification.Add(notification2);
+                            Notifications notification2 = new Notifications
+                            {
+                                TicketId = ticket.Id,
+                                UserId = ticket.AssignedUserId,
+                                TypeId = 2,
+                                AuthorProfile = user.ProfileIcon,
+                                Created = DateTimeOffset.Now,
+                                Description = string.Format("Has been modified")
+                            };
+                            db.Notification.Add(notification2);
+                        }
                     }
 
                     db.TicketHistory.Add(tHistory);
@@ -423,7 +474,10 @@ namespace Bugtracker.Controllers
                 db.SaveChanges();
                 return RedirectToAction("Details", "Tickets", new { id = ticket.Id });
             }
-
+            if (id == "editdetails")
+            {
+                return View("Details", ticket);
+            }
             return View(ticket);
         }
 
@@ -478,31 +532,34 @@ namespace Bugtracker.Controllers
                     project.Updated = DateTimeOffset.Now;
                     db.TicketComment.Add(comment);
 
-                    //Send email of changes if the person who made the changes IS NOT assigned to the ticket
-                    if (User.Identity.GetUserId() != ticket.AssignedUserId)
+
+                    if (ticket.AssignedUserId != null)
                     {
-                        //Creating email Body
-                        StringBuilder sb = new StringBuilder();
-                        var callBackUrl = Url.Action("Details", "Tickets", new { id = ticket.Id }, protocol: Request.Url.Scheme);
-                        sb.Append("A comment has been made on the ticket: <b>" + ticket.Title + "</b><br><br>");
-                        sb.Append(string.Format("<b>{0}</b>: <em>{1}</em><br>", db.Users.Find(User.Identity.GetUserId()).DisplayName, comment.Body));
-                        sb.Append("<br>Please click <a href=\"" + callBackUrl + "\">here</a> to view details");
-                        //Sending email to Assigned User
-                        await UserManager.SendEmailAsync(ticket.AssignedUserId, string.Format("Ticket Commented On: {0}", ticket.Title), sb.ToString());
-                        var user = db.Users.Find(User.Identity.GetUserId());
-
-                        Notifications notification = new Notifications
+                        //Send email of changes if the person who made the changes IS NOT assigned to the ticket
+                        if (User.Identity.GetUserId() != ticket.AssignedUserId)
                         {
-                            TicketId = ticket.Id,
-                            UserId = ticket.AssignedUserId,
-                            TypeId = 4,
-                            AuthorProfile = user.ProfileIcon,
-                            Created = DateTimeOffset.Now,
-                            Description = string.Format("New comment")
-                        };
-                        db.Notification.Add(notification);
-                    }
+                            //Creating email Body
+                            StringBuilder sb = new StringBuilder();
+                            var callBackUrl = Url.Action("Details", "Tickets", new { id = ticket.Id }, protocol: Request.Url.Scheme);
+                            sb.Append("A comment has been made on the ticket: <b>" + ticket.Title + "</b><br><br>");
+                            sb.Append(string.Format("<b>{0}</b>: <em>{1}</em><br>", db.Users.Find(User.Identity.GetUserId()).DisplayName, comment.Body));
+                            sb.Append("<br>Please click <a href=\"" + callBackUrl + "\">here</a> to view details");
+                            //Sending email to Assigned User
+                            await UserManager.SendEmailAsync(ticket.AssignedUserId, string.Format("Ticket Commented On: {0}", ticket.Title), sb.ToString());
+                            var user = db.Users.Find(User.Identity.GetUserId());
 
+                            Notifications notification = new Notifications
+                            {
+                                TicketId = ticket.Id,
+                                UserId = ticket.AssignedUserId,
+                                TypeId = 4,
+                                AuthorProfile = user.ProfileIcon,
+                                Created = DateTimeOffset.Now,
+                                Description = string.Format("New comment")
+                            };
+                            db.Notification.Add(notification);
+                        }
+                    }
                     db.SaveChanges();
                 }
                 else
@@ -637,37 +694,39 @@ namespace Bugtracker.Controllers
                     }
                 }
 
-                //Send email of changes if the person who made the changes IS NOT assigned to the ticket
-                if (User.Identity.GetUserId() != ticket.AssignedUserId)
+                if (ticket.AssignedUserId != null)
                 {
-                    //Creating email Body
-                    StringBuilder sb = new StringBuilder();
-                    var callBackUrl = Url.Action("Details", "Tickets", new { id = ticket.Id }, protocol: Request.Url.Scheme);
-                    sb.Append("Attachment(s) have been added to the ticket: <b>" + ticket.Title + "</b><br>");
-                    sb.Append("<ul>");
-                    foreach (var file in fileList)
+                    //Send email of changes if the person who made the changes IS NOT assigned to the ticket
+                    if (User.Identity.GetUserId() != ticket.AssignedUserId)
                     {
-                        sb.AppendFormat("<li><em>{0}</em></li>", file);
-                    };
-                    sb.Append("</ul>");
-                    sb.Append(string.Format("Uploaded by: {0}", db.Users.Find(User.Identity.GetUserId()).DisplayName));
-                    sb.Append("<br><br>Please click <a href=\"" + callBackUrl + "\">here</a> to view details");
-                    //Sending email to Assigned User
-                    await UserManager.SendEmailAsync(ticket.AssignedUserId, string.Format("Ticket Attachment(s) Added: {0}", ticket.Title), sb.ToString());
-                    var user = db.Users.Find(User.Identity.GetUserId());
+                        //Creating email Body
+                        StringBuilder sb = new StringBuilder();
+                        var callBackUrl = Url.Action("Details", "Tickets", new { id = ticket.Id }, protocol: Request.Url.Scheme);
+                        sb.Append("Attachment(s) have been added to the ticket: <b>" + ticket.Title + "</b><br>");
+                        sb.Append("<ul>");
+                        foreach (var file in fileList)
+                        {
+                            sb.AppendFormat("<li><em>{0}</em></li>", file);
+                        };
+                        sb.Append("</ul>");
+                        sb.Append(string.Format("Uploaded by: {0}", db.Users.Find(User.Identity.GetUserId()).DisplayName));
+                        sb.Append("<br><br>Please click <a href=\"" + callBackUrl + "\">here</a> to view details");
+                        //Sending email to Assigned User
+                        await UserManager.SendEmailAsync(ticket.AssignedUserId, string.Format("Ticket Attachment(s) Added: {0}", ticket.Title), sb.ToString());
+                        var user = db.Users.Find(User.Identity.GetUserId());
 
-                    Notifications notification = new Notifications
-                    {
-                        TicketId = ticket.Id,
-                        UserId = ticket.AssignedUserId,
-                        TypeId = 3,
-                        AuthorProfile = user.ProfileIcon,
-                        Created = DateTimeOffset.Now,
-                        Description = string.Format("New attachment")
-                    };
-                    db.Notification.Add(notification);
+                        Notifications notification = new Notifications
+                        {
+                            TicketId = ticket.Id,
+                            UserId = ticket.AssignedUserId,
+                            TypeId = 3,
+                            AuthorProfile = user.ProfileIcon,
+                            Created = DateTimeOffset.Now,
+                            Description = string.Format("New attachment")
+                        };
+                        db.Notification.Add(notification);
+                    }
                 }
-
                 //Ticket Update
                 ticket.Updated = DateTimeOffset.Now;
                 //Project Update

@@ -10,8 +10,9 @@
                 {
                     @Html.AntiForgeryToken()
                     <div class="form-actions no-color text-center">
+                        <button data-dismiss="modal" type="button" class="btn btn-default center">Cancel</button>
                         <input type="submit" value="Delete" class="btn btn-primary" />
-                        <a href="@Url.Action("Details", "Tickets", new { id = Model.TicketId })" class="btn btn-primary">Cancel</a>
+                        @*<a href="@Url.Action("Details", "Tickets", new { id = Model.TicketId })" class="btn btn-primary">Cancel</a>*@
                     </div>
                 }
             </div>

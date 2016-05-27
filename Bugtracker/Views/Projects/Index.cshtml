@@ -9,6 +9,10 @@
         <div class="box">
             <div class="box-header with-border">
                 <h3 class="box-title">Projects</h3>
+                @if (User.Identity.IsAuthenticated && User.IsInRole("Administrator"))
+                {
+                    <a href="@Url.Action("CreateProjectPartial", "Projects")" data-toggle="modal" data-target="#create-project" class="btn btn-default pull-right"><i class="fa fa-plus"></i> New Project</a>
+                }
             </div><!-- /.box-header -->
             <div class="box-body">
                 <table class="display table table-bordered table-condensed table-striped">
@@ -67,7 +71,7 @@
                                     @{
                                         if (item.Updated.HasValue)
                                         {
-                                            var updated = item.Updated.Value.ToString("d");
+                                            var updated = item.Updated.Value.ToString("yyyy-MM-ddTHH:mm:ss");
                                             @updated
                                         }
                                     }
@@ -86,10 +90,13 @@
                                 </td>
                                 <td>
                                     <ul class="list-inline">
-                                        @if (User.IsInRole("Administrator"))
+                                        @if (User.IsInRole("Administrator") || (User.Identity.GetUserId() == item.ProjectManagerId && item.Status != "Closed"))
                                         {
                                             @*<li><a href="@Url.Action("Edit", "Projects", new { id = item.Id })" data-toggle="tooltip" title="Edit"><i class="fa fa-pencil"></i></a></li>*@
                                             <li><span data-toggle="tooltip" title="Edit"><a href="@Url.Action("Edit", "Projects", new { id = item.Id })" data-toggle="modal" data-target="#edit-project"><i class="fa fa-pencil"></i></a></span></li>
+                                        }
+                                        @if (User.IsInRole("Administrator"))
+                                        {
                                             <li><span data-toggle="modal" data-target="#basic"><a href="#delete" data-toggle="tooltip" data-target="#basic" class="deleteProject" id="@item.Id" title="Delete"><i class="fa fa-trash"></i></a></span></li>
                                         }
                                         <li><span data-toggle="tooltip" title="Create Ticket"><a href="@Url.Action("CreateTicketPartial", "Tickets", new { id = item.Id })" data-toggle="modal" data-target="#create-ticket"><i class="fa fa-plus"></i></a></span></li>
@@ -131,10 +138,6 @@
                     </tfoot>
                 </table>
              </div>
-            @if (User.Identity.IsAuthenticated && User.IsInRole("Administrator"))
-            {
-                <a href="@Url.Action("CreateProjectPartial", "Projects")" data-toggle="modal" data-target="#create-project" class="btn btn-default pull-right"><i class="fa fa-plus"></i> New Project</a>
-            }
         </div>
     </div>
 </div>
@@ -197,7 +200,8 @@
     <script>
         $(function () {
             $('table.display').DataTable({
-                                "aoColumnDefs":
+                responsive: true,
+                "aoColumnDefs":
                     [{
                             "targets": [3],
                             "visible": false,
@@ -206,7 +210,8 @@
                         {
                             "iDataSort": 2, "aTargets": [3]
                         }],
-               "order": [[ 2, "desc" ]],
+                            "order": [[3, "desc"]],
+                            "sType": "date", "aTargets": [3]
             });
 
             var projectId;

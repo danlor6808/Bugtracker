@@ -2,33 +2,268 @@
     ViewBag.Title = "Home Page";
 }
 
-<div class="col-lg-12 main">
+@section header {
+<header>
+    <div class="container">
+         <img src="~/upload/default.svg" class="mainsvg"/>
+        <div class="intro-text animated fadeInUp">
+            <div class="intro-lead-in gfont2">Tracking bugs one error at a time</div>
+            <div class="intro-heading gfont">Bugtracks</div>
+        </div>
+        <a href="#details" class="page-scroll btn btn-x1">Details</a>
+     </div>
+</header>
 
-    <div class="jumbotron well">
-        <h1>ASP.NET</h1>
-        <p class="lead">ASP.NET is a free web framework for building great Web sites and Web applications using HTML, CSS and JavaScript.</p>
-        <p><a href="#" id="collapse" class="btn btn-primary btn-lg">Learn more &raquo;</a></p>
+<section id="details" class="jumbotron no-margin text-center">
+    <h1 class="display-3"><span class="gfont">"What is Bugtracks?"</span></h1>
+    <div class="container">
+        <p>
+            Bugtracks is an online web issue-tracking system created to help development teams log reported software errors and resolutions.
+            Using Bugtracks provides a team with a dependable issue-management system that provides both a clear overview development requests, and their current statuses.
+        </p>
     </div>
+</section>
 
-    <div class="row">
-        <div class="col-md-4">
-            <h2>Getting started</h2>
-            <p>
-                ASP.NET MVC gives you a powerful, patterns-based way to build dynamic websites that
-                enables a clean separation of concerns and gives you full control over markup
-                for enjoyable, agile development.
-            </p>
-            <p><a class="btn btn-default" href="http://go.microsoft.com/fwlink/?LinkId=301865">Learn more &raquo;</a></p>
+<section class="jumbotron no-margin text-center dark">
+    <h1 class="display-3"><span class="gfont">"How does it work?"</span></h1>
+    <div class="container">
+        <div class="row bs-wizard" style="border-bottom:0;">
+            <div class="col-xs-3 bs-wizard-step complete">
+                <div class="text-center bs-wizard-stepnum">Create </div>
+                <div class="progress"><div class="progress-bar"></div></div>
+                <a href="#" class="bs-wizard-dot"></a>
+                <div class="bs-wizard-info text-center">Administrators create projects, as well as assign one of four roles to other users:<br />
+                    <strong>Administrator, Project Manager, Developer, Submitter</strong></div>
+            </div>
+
+            <div class="col-xs-3 bs-wizard-step complete">
+                <!-- complete -->
+                <div class="text-center bs-wizard-stepnum">Step 2</div>
+                <div class="progress"><div class="progress-bar"></div></div>
+                <a href="#" class="bs-wizard-dot"></a>
+                <div class="bs-wizard-info text-center">
+                    The Administrator assigns Project Managers to supervise projects. They in turn, assign developers to work on incoming software tickets.
+                </div>
+            </div>
+
+            <div class="col-xs-3 bs-wizard-step complete">
+                <!-- complete -->
+                <div class="text-center bs-wizard-stepnum">Step 3</div>
+                <div class="progress"><div class="progress-bar"></div></div>
+                <a href="#" class="bs-wizard-dot"></a>
+                <div class="bs-wizard-info text-center">Developers work on their assigned ticket until it is resolved, and then wait for more tickets to be assigned to them by the Project Manager.</div>
+            </div>
+
+            <div class="col-xs-3 bs-wizard-step complete">
+                <!-- active -->
+                <div class="text-center bs-wizard-stepnum">Step 4</div>
+                <div class="progress"><div class="progress-bar"></div></div>
+                <a href="#" class="bs-wizard-dot"></a>
+                <div class="bs-wizard-info text-center">Although anyone can submit a ticket, users who are "Submitters" are generally the ones who submit tickets for any bugs they may encounter.</div>
+            </div>
         </div>
-        <div class="col-md-4">
-            <h2>Get more libraries</h2>
-            <p>NuGet is a free Visual Studio extension that makes it easy to add, remove, and update libraries and tools in Visual Studio projects.</p>
-            <p><a class="btn btn-default" href="http://go.microsoft.com/fwlink/?LinkId=301866">Learn more &raquo;</a></p>
-        </div>
-        <div class="col-md-4">
-            <h2>Web Hosting</h2>
-            <p>You can easily find a web hosting company that offers the right mix of features and price for your applications.</p>
-            <p><a class="btn btn-default" href="http://go.microsoft.com/fwlink/?LinkId=301867">Learn more &raquo;</a></p>
+    </div>
+</section>
+
+<section id="details" class="jumbotron no-margin text-center white">
+    <h1 class="display-3"><span class="gfont">Technologies Used</span></h1>
+    <div class="container">
+        <ul class="list-unstyled">
+            <li>
+                <img src="~/upload/badges/icon_html5-JS-CSS3.png" class="tech triple" />
+                <img src="~/upload/badges/icon_visualstudio.png" class="tech" />
+                <img src="~/upload/badges/icon_Sql.png" class="tech" />
+                <img src="~/upload/badges/icon_.net.png" class="tech" />
+            </li>
+        </ul>
+    </div>
+</section>
+
+<section class="jumbotron no-margin text-center light">
+    <h1 class="display-3"><span class="gfont">Try it out!</span></h1>
+    <div class="container">
+
+    </div>
+</section>
+}
+
+<div class="row">
+    <div class="col-lg-12 main">
+        <div class="row">
+            <div class="col-md-3">
+                <div id="administrator" class="panel panel-default">
+                    <div class="panel-heading text-center">
+                        <img src="~/dist/img/icon_admin.jpg" class="img-circle" style="width:5em; display:block; margin:auto" />
+                        <h3>Administrator</h3>
+                    </div>
+                    <div class="panel-body text-center">
+                        <p class="lead">
+                            <strong>Permissions</strong>
+                        </p>
+                    </div>
+                    <ul class="list-group list-group-flush text-center">
+                        <li class="list-group-item">
+                            Create / Edit / Delete Projects
+                            <span class="glyphicon glyphicon-ok pull-right"></span>
+                        </li>
+                        <li class="list-group-item">
+                            Create / Edit / Delete Tickets
+                            <span class="glyphicon glyphicon-ok pull-right"></span>
+                        </li>
+                        <li class="list-group-item">
+                            Assign User Roles
+                            <span class="glyphicon glyphicon-ok pull-right"></span>
+                        </li>
+                        <li class="list-group-item">
+                            Assign Project Managers
+                            <span class="glyphicon glyphicon-ok pull-right"></span>
+                        </li>
+                        <li class="list-group-item">
+                            Assign Developers
+                            <span class="glyphicon glyphicon-remove pull-right"></span>
+                        </li>
+                    </ul>
+                    <div class="panel-footer">
+                        <p><a class="btn btn-lg btn-block text-black" href="@Url.Action("GuestUserLogin","Account", new { guestid = 4 })">Demo <i class="fa fa-sign-in"></i></a></p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div id="projectmanager" class="panel panel-default">
+                    <div class="panel-heading text-center">
+                        <img src="~/dist/img/icon_projectmanager.jpg" class="img-circle" style="width:5em; display:block; margin:auto" />
+                        <h3>Project Manager</h3>
+                    </div>
+                    <div class="panel-body text-center">
+                        <p class="lead">
+                            <strong>Permissions</strong>
+                        </p>
+                    </div>
+                    <ul class="list-group list-group-flush text-center">
+                        <li class="list-group-item">
+                            Create / Edit Projects
+                            <span class="glyphicon glyphicon-ok pull-right"></span>
+                        </li>
+                        <li class="list-group-item">
+                            Create / Edit Tickets
+                            <span class="glyphicon glyphicon-ok pull-right"></span>
+                        </li>
+                        <li class="list-group-item">
+                            Assign User Roles
+                            <span class="glyphicon glyphicon-remove pull-right"></span>
+                        </li>
+                        <li class="list-group-item">
+                            Assign Project Managers
+                            <span class="glyphicon glyphicon-remove pull-right"></span>
+                        </li>
+                        <li class="list-group-item">
+                            Assign Developers
+                            <span class="glyphicon glyphicon-ok pull-right"></span>
+                        </li>
+                    </ul>
+                    <div class="panel-footer">
+                        <p><a class="btn btn-lg btn-block text-black" href="@Url.Action("GuestUserLogin","Account", new { guestid = 3 })">Demo <i class="fa fa-sign-in"></i></a></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div id="developer" class="panel panel-default">
+                    <div class="panel-heading text-center">
+                        <img src="~/dist/img/icon_developer.jpg" class="img-circle" style="width:5em; display:block; margin:auto" />
+                        <h3>Developer</h3>
+                    </div>
+                    <div class="panel-body text-center">
+                        <p class="lead">
+                            <strong>Permissions</strong>
+                        </p>
+                    </div>
+                    <ul class="list-group list-group-flush text-center">
+                        <li class="list-group-item">
+                            Create / Edit / Delete Projects
+                            <span class="glyphicon glyphicon-remove pull-right"></span>
+                        </li>
+                        <li class="list-group-item">
+                            Create / Edit Tickets
+                            <span class="glyphicon glyphicon-ok pull-right"></span>
+                        </li>
+                        <li class="list-group-item">
+                            Assign User Roles
+                            <span class="glyphicon glyphicon-remove pull-right"></span>
+                        </li>
+                        <li class="list-group-item">
+                            Assign Project Managers
+                            <span class="glyphicon glyphicon-remove pull-right"></span>
+                        </li>
+                        <li class="list-group-item">
+                            Assign Developers
+                            <span class="glyphicon glyphicon-remove pull-right"></span>
+                        </li>
+                    </ul>
+                    <div class="panel-footer">
+                        <p><a class="btn btn-lg btn-block text-black" href="@Url.Action("GuestUserLogin","Account", new { guestid = 2 })">Demo <i class="fa fa-sign-in"></i></a></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div id="submitter" class="panel panel-default">
+                    <div class="panel-heading text-center">
+                        <img src="~/dist/img/icon_submitter.jpg" class="img-circle" style="width:5em; display:block; margin:auto" />
+                        <h3>Submitter</h3>
+                    </div>
+                    <div class="panel-body text-center">
+                        <p class="lead">
+                            <strong>Permissions</strong>
+                        </p>
+                    </div>
+                    <ul class="list-group list-group-flush text-center">
+                        <li class="list-group-item">
+                            Create / Edit / Delete Projects
+                            <span class="glyphicon glyphicon-remove pull-right"></span>
+                        </li>
+                        <li class="list-group-item">
+                            Create / Edit Tickets
+                            <span class="glyphicon glyphicon-ok pull-right"></span>
+                        </li>
+                        <li class="list-group-item">
+                            Assign User Roles
+                            <span class="glyphicon glyphicon-remove pull-right"></span>
+                        </li>
+                        <li class="list-group-item">
+                            Assign Project Managers
+                            <span class="glyphicon glyphicon-remove pull-right"></span>
+                        </li>
+                        <li class="list-group-item">
+                            Assign Developers
+                            <span class="glyphicon glyphicon-remove pull-right"></span>
+                        </li>
+                    </ul>
+                    <div class="panel-footer">
+                        <p><a class="btn btn-lg btn-block text-black" href="@Url.Action("GuestUserLogin","Account", new { guestid = 1 })">Demo <i class="fa fa-sign-in"></i></a></p>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 </div>
+
+@section CustomJS {
+    <script>
+    $(function() {
+  $('a[href*="#"]:not([href="#"])').click(function() {
+    if (location.pathname.replace(/^\//,'') == this.pathname.replace(/^\//,'') && location.hostname == this.hostname) {
+      var target = $(this.hash);
+      target = target.length ? target : $('[name=' + this.hash.slice(1) +']');
+      if (target.length) {
+        $('html, body').animate({
+          scrollTop: target.offset().top
+        }, 1000);
+        return false;
+      }
+    }
+  });
+    });
+    </script>
+    }

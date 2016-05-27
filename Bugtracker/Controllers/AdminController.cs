@@ -33,6 +33,8 @@ namespace Bugtracker.Controllers
                 eachUser.roles = new List<string>();
                 eachUser.user = user;
                 eachUser.roles = helper.ListUserRoles(user.Id).ToList();
+                eachUser.TotalTickets = db.Ticket.Where(u => u.AssignedUserId == user.Id).Distinct().Count();
+                eachUser.TotalProjects = db.Project.Where(u => u.ProjectManagerId == user.Id).Distinct().Count();
                 users.Add(eachUser);
             }
             var CurrentUser = users.First(u => u.user.Id == User.Identity.GetUserId());
@@ -56,8 +58,8 @@ namespace Bugtracker.Controllers
             model.Name = user.UserName;
             model.SelectedRoles = helper.ListUserRoles(id).ToArray();
             model.Roles = new MultiSelectList(db.Roles, "Name", "Name", model.SelectedRoles);
-            model.Projects = new MultiSelectList(db.Project, "Id", "Name", model.CurrentProjects);
-
+            //model.Projects = new MultiSelectList(db.Project, "Id", "Name", model.CurrentProjects);
+            ViewBag.user = user;
             return View(model);
         }
 

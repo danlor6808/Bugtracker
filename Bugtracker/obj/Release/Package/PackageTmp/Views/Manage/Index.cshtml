@@ -1,47 +1,48 @@
 ﻿@model Bugtracker.Models.IndexViewModel
 @using Bugtracker.Models;
+@using Microsoft.AspNet.Identity;
 
 <div class="row">
     <div class="col-lg-12">
-        <div class="col-md-3">
+        <div class="col-md-4">
             <!-- Profile Image -->
             <div class="box box-primary">
                 <div class="box-body box-profile">
                     <img class="profile-user-img img-responsive img-circle" src="@Model.User.ProfileIcon" alt="User profile picture">
                     <h3 class="profile-username text-center">@Model.User.DisplayName</h3>
-                    <p class="text-center">
-                        @if (Model.HasPassword)
-                        {
-                            @:[ <a href="@Url.Action("ChangePassword", "Manage")" data-toggle="modal" data-target="#change-pw">Change Your Password</a> ]
-                        }
-                    </p>
-
                     <p class="text-muted text-center">
                         @foreach (var role in ViewBag.RoleList)
                         {
                             @role <br />
                         }
                     </p>
-                    <ul class="list-group list-group-unbordered">
-                        <li class="list-group-item">
-                            <b>Tickets Created</b> <a class="pull-right" href="@Url.Action("Index","Tickets")">@ViewBag.UserTickets.Count</a>
-                        </li>
-                        <li class="list-group-item">
-                            <b>Completed Tickets</b> <a class="pull-right">@ViewBag.CompletedTickets.Count</a>
-                        </li>
-                    </ul>
+                <ul class="list-group list-group-unbordered">
+                    <li class="list-group-item">
+                        <b>Name</b>
+                        <a class="pull-right">@Model.User.FirstName @Model.User.LastName</a> 
+                    </li>
+                    <li class="list-group-item">
+                        <b>E-mail Address</b>
+                        <a class="pull-right">@Model.User.Email</a>
+                    </li>
+                    <li class="list-group-item">
+                        <b>Phone Number</b>
+                        <a class="pull-right">@Model.User.PhoneNumber</a>
+                    </li>
+                </ul>
                     <p class="text-@ViewBag.tColor text-center">@ViewBag.StatusMessage</p>
                 </div><!-- /.box-body -->
             </div><!-- /.box -->
         </div>
 
-        <div class="col-md-9">
+        <div class="col-md-8">
             <!-- Profile Image -->
             <div class="nav-tabs-custom">
                 <ul class="nav nav-tabs">
                     <li class="active"><a href="#recent-tickets" data-toggle="tab">Recent Tickets</a></li>
-                    <li><a href="#timeline" data-toggle="tab">Change Log</a></li>
-                    <li><a href="#settings" data-toggle="tab">Settings</a></li>
+                    <li><a href="#timeline" data-toggle="tab">Recent Activity</a></li>
+                    <li><a href="#settings" data-toggle="tab">Personal Settings</a></li>
+                    <li><a href="#password" data-toggle="tab">Change Password</a></li>
                 </ul>
 
                 <div class="tab-content">
@@ -82,7 +83,7 @@
                                         <td>
                                             @if (@item.AssignedUser != null)
                                             {
-                                                @item.AssignedUser.UserName
+                                                @item.AssignedUser.DisplayName
                                             }
                                         </td>
                                         <td>
@@ -97,7 +98,7 @@
                             </tbody>
                         </table>
                     </div>
-                    <div class="tab-pane" id="timeline">
+                    <div class="tab-pane" id="timeline"> <!--Timeline/Personal History-->
                         <!-- The timeline -->
                         <ul class="timeline timeline-inverse">
                             @foreach (var item in Model.User.TicketHistory.Reverse())
@@ -111,11 +112,10 @@
                         <!-- /.timeline-label -->
                         <!-- timeline item -->
                                 <li>
-                                    @*<i class="fa fa-cogs bg-blue"></i>*@
                                     <i class="fa"><img src="@item.User.ProfileIcon" class="img-circle" style="max-width: 35px" /></i>
                                     <div class="timeline-item">
                                         <span class="time"><i class="fa fa-clock-o"></i> @TimeHelper.TimeAgo(item.Created)</span>
-                                        <h3 class="timeline-header"><a href="@Url.Action("Details","Tickets", new { id = item.TicketId })">@item.Ticket.Title</a></h3>
+                                        <h3 class="timeline-header">@item.Ticket.Title</h3>
                                         <div class="timeline-body">
                                             <ul>
                                                 @{
@@ -128,10 +128,9 @@
                                                 }
                                             </ul>
                                         </div>
-                                        @*<div class="timeline-footer">
-                                                <a class="btn btn-primary btn-xs">Read more</a>
-                                                <a class="btn btn-danger btn-xs">Delete</a>
-                                            </div>*@
+                                        <div class="timeline-footer">
+                                                <a class="btn btn-primary btn-xs" href="@Url.Action("Details","Tickets", new { id = item.TicketId })">View</a>
+                                        </div>
                                     </div>
                                 </li>
                         <!-- END timeline item -->
@@ -141,7 +140,7 @@
                             </li>
                         </ul>
                     </div> <!--#timeline-->
-                    <div class="tab-pane" id="settings">
+                    <div class="tab-pane" id="settings"> <!--Personal Information-->
                         @using (Html.BeginForm("Index", "Manage", FormMethod.Post, new { @class = "form-horizontal", role = "form", enctype = "Multipart/form-data" }))
                         {
                             @Html.AntiForgeryToken()
@@ -149,25 +148,25 @@
                             <div class="form-group">
                                 @Html.LabelFor(m => m.DisplayName, new { @class = "col-sm-2 control-label" })
                                 <div class="col-sm-10">
-                                    @Html.TextBoxFor(m => m.DisplayName, new { @class = "form-control" })
+                                    @Html.TextBoxFor(m => m.DisplayName, new { @class = "form-control", @required = "required" })
                                 </div>
                             </div>
                             <div class="form-group">
                                 @Html.LabelFor(m => m.FirstName, new { @class = "col-sm-2 control-label" })
                                 <div class="col-sm-10">
-                                    @Html.TextBoxFor(m => m.FirstName, new { @class = "form-control" })
+                                    @Html.TextBoxFor(m => m.FirstName, new { @class = "form-control", @required = "required" })
                                 </div>
                             </div>
                             <div class="form-group">
                                 @Html.LabelFor(m => m.LastName, new { @class = "col-sm-2 control-label" })
                                 <div class="col-sm-10">
-                                    @Html.TextBoxFor(m => m.LastName, new { @class = "form-control" })
+                                    @Html.TextBoxFor(m => m.LastName, new { @class = "form-control", @required = "required" })
                                 </div>
                             </div>
                             <div class="form-group">
                                 @Html.LabelFor(m => m.PhoneNumber, new { @class = "col-sm-2 control-label" })
                                 <div class="col-sm-10">
-                                    @Html.TextBoxFor(m => m.PhoneNumber, new { @class = "form-control", id = "phone" })
+                                    @Html.TextBoxFor(m => m.PhoneNumber, new { @class = "form-control", id = "phone", @required = "required" })
                                 </div>
                             </div>
                             <div class="form-group">
@@ -187,7 +186,37 @@
                             </div>
                             <div class="form-group">
                                 <div class="col-sm-offset-2 col-sm-10">
-                                    <input type="submit" value="Submit Changes" class="btn btn-danger" />
+                                    <button type="submit" name ="type" value="personal" class="btn btn-danger">Submit</button>
+                                </div>
+                            </div>
+                        }
+                    </div><!-- /.tab-pane -->
+                    <div class="tab-pane" id="password"> <!--Change Password-->
+                        @using (Html.BeginForm("Index", "Manage", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+                        {
+                            @Html.AntiForgeryToken()
+                            @Html.ValidationSummary("", new { @class = "text-danger" })
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.OldPassword, new { @class = "col-md-2 control-label" })
+                                <div class="col-md-10">
+                                    @Html.PasswordFor(m => m.OldPassword, new { @class = "form-control", @required = "required" })
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.NewPassword, new { @class = "col-md-2 control-label" })
+                                <div class="col-md-10">
+                                    @Html.PasswordFor(m => m.NewPassword, new { @class = "form-control", @required = "required" })
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                @Html.LabelFor(m => m.ConfirmPassword, new { @class = "col-md-2 control-label" })
+                                <div class="col-md-10">
+                                    @Html.PasswordFor(m => m.ConfirmPassword, new { @class = "form-control", @required = "required" })
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-sm-offset-2 col-sm-10">
+                                    <button type="submit" name="type" value="password" class="btn btn-danger">Submit</button>
                                 </div>
                             </div>
                         }
@@ -195,13 +224,6 @@
                 </div>
             </div>
         </div><!-- /.box -->
-    </div>
-</div>
-<!--Change Password Modal-->
-<div class="modal fade" id="change-pw" tabindex="-1" role="alert" aria-hidden="true" style="display: none;">
-    <div class="modal-dialog">
-        <div class="modal-content ticketbox">
-        </div>
     </div>
 </div>
 

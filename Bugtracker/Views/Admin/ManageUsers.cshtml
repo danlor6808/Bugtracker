@@ -54,21 +54,20 @@
                                     @Html.DisplayFor(modelItem => item.user.Email)
                                 </td>
                                 <td>
-                                    @if (item.user.Projects.Where(u => u.ProjectManagerId == item.user.Id) != null)
+                                    @if (item.TotalProjects != 0)
                                     {
-                                        var list = item.user.Projects.Where(u => u.ProjectManagerId == item.user.Id);
-                                        @list.Count()
+                                        @item.TotalProjects
                                     }
                                     else
                                     {
                                         @:0
                                     }
+
                                 </td>
                                 <td>
-                                    @if (item.user.Projects.Where(u => u.Tickets.All(t => t.AssignedUserId == item.user.Id)) != null)
+                                    @if (item.TotalTickets != 0)
                                     {
-                                        var list = item.user.Projects.Where(u => u.Tickets.All(t => t.AssignedUserId == item.user.Id));
-                                        @list.Count()
+                                        @item.TotalTickets
                                     }
                                     else
                                     {

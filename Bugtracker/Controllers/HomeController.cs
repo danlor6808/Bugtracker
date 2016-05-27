@@ -1,10 +1,13 @@
 ﻿using Bugtracker.Models;
 using Microsoft.AspNet.Identity;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Web;
 using System.Web.Mvc;
+using System.Web.Script.Serialization;
 
 namespace Bugtracker.Controllers
 {
@@ -24,37 +27,17 @@ namespace Bugtracker.Controllers
         public ActionResult UserPanel()
         {
             ViewBag.layout = "sidebar-mini sidebar-collapse fixed";
-            ViewBag.Header = "Dashboard";
             ViewBag.Current = "Dashboard";
             var user = db.Users.Find(User.Identity.GetUserId());
-            var list = new List<Project>();
-            if (User.IsInRole("Administrator"))
-            {
-                list = db.Project.OrderByDescending(o => o.Created).ToList();
-                ViewBag.UserTickets = db.Ticket.OrderByDescending(d => d.Created).ToList();
-            }
-            else if (User.IsInRole("Project Manager"))
-            {
-                list = user.Projects.OrderByDescending(d => d.Created).ToList();
-                var tickets = list.SelectMany(u => u.Tickets).ToList();
-                tickets.AddRange(db.Ticket.Where(u => u.AuthorId == user.Id).ToList());
-                tickets.AddRange(db.Ticket.Where(u => u.AssignedUserId == user.Id).ToList());
-                ViewBag.UserTickets = tickets.OrderByDescending(d => d.Created).Distinct().ToList();
-            }
-            else
-            { 
-                var tempList = db.Ticket.Where(u => u.AuthorId == user.Id).ToList();
-                tempList.AddRange(db.Ticket.Where(u => u.AssignedUserId == user.Id).ToList());
-                ViewBag.UserTickets = tempList.OrderByDescending(d => d.Created).Distinct().ToList();
-            }
             //Graph/Chart Details
             ViewBag.TotalProjects = db.Project.ToList();
             ViewBag.TotalTickets = db.Ticket.ToList();
             ViewBag.TotalUsers = db.Users.ToList();
             var totalTickets = db.Ticket.ToList();
             var completedTickets = db.Ticket.Where(u => u.StatusId == 3).ToList();
+            ViewBag.CompleteTicketsStatic = completedTickets.Count;
             ViewBag.CompletedTickets = (int)Math.Round((double)(100 * completedTickets.Count) / totalTickets.Count);
-            return View(list);
+            return View();
         }
 
         [Authorize]
@@ -106,5 +89,6 @@ namespace Bugtracker.Controllers
             db.SaveChanges();
             return Redirect(HttpContext.Request.UrlReferrer.AbsoluteUri);
         }
+
     }
 }

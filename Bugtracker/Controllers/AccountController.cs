@@ -63,16 +63,16 @@ namespace Bugtracker.Controllers
                 {
                     case 1:
                         await SignInManager.PasswordSignInAsync("submitter@test.com", "Password1", false, shouldLockout: false);
-                        return RedirectToAction("Index", "Home");
+                        return RedirectToAction("UserPanel", "Home");
                     case 2:
                         await SignInManager.PasswordSignInAsync("developer@test.com", "Password1", false, shouldLockout: false);
-                        return RedirectToAction("Index", "Home");
+                        return RedirectToAction("UserPanel", "Home");
                     case 3:
                         await SignInManager.PasswordSignInAsync("projectmanager@test.com", "Augusttr6019!", false, shouldLockout: false);
-                        return RedirectToAction("Index", "Home");
+                        return RedirectToAction("UserPanel", "Home");
                     case 4:
                         await SignInManager.PasswordSignInAsync("guest@123.com", "guest@123.com", false, shouldLockout: false);
-                        return RedirectToAction("Index", "Home");
+                        return RedirectToAction("UserPanel", "Home");
                 }
             }
             return RedirectToAction("Index", "Home");

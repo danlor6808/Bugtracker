@@ -1,10 +1,11 @@
 ﻿@model Bugtracker.Models.AdminViewModel
+
 @{
     Layout = null;
 }
 
-<h4 class="text-center">Edit User Roles</h4>
-<p class="text-center"><small>@Html.DisplayFor(model => model.DisplayName)</small></p>
+<p class="text-center"><img src="@ViewBag.user.ProfileIcon" class="img-circle" style="height: 75px; width: 75px"/></p>
+<h4 class="text-center">@ViewBag.user.DisplayName</h4>
 <hr />
 @using (Html.BeginForm("EditUser", "Admin", FormMethod.Post))
 {

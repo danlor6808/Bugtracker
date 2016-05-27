@@ -102,7 +102,7 @@ namespace Bugtracker.Controllers
         }
 
         // GET: Projects/Edit/5
-        [Authorize(Roles = "Project Manager")]
+        [Authorize(Roles = "Administrator, Project Manager")]
         public ActionResult Edit(int? id)
         {
             ViewBag.Header = "Edit";
@@ -145,7 +145,13 @@ namespace Bugtracker.Controllers
                 currentProject.Name = project.Name;
                 currentProject.Status = project.Status;
                 currentProject.Deadline = project.Deadline;
-                currentProject.ProjectManagerId = UserSelected;
+                if (UserSelected != null)
+                {
+                    currentProject.ProjectManagerId = UserSelected;
+                } else
+                {
+                    currentProject.ProjectManagerId = Request["ProjectManagerId"];
+                }
 
                 var pmId = db.Roles.First(u => u.Name == "Project Manager");
 
